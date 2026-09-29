@@ -1,6 +1,12 @@
+using LinqToDB;
+
 namespace Infrastructure;
 
-public class DatabaseInitializer
+public static class DatabaseInitializer
 {
-    
+    public static void Initialize(AppDb db)
+    {
+        db.CreateTable<Category>(
+            tableOptions: TableOptions.CreateIfNotExists);
+    }
 }
