@@ -5,8 +5,8 @@ namespace Infrastructure;
 
 public class AppDb : DataConnection
 {
-    // Sets up the connection to the database
     public AppDb(DataOptions<AppDb> options) : base(options.Options) { }
-    // Gives us access to the Category table
+
     public ITable<Category> Categories => this.GetTable<Category>();
+    public ITable<Listing> Listings => this.GetTable<Listing>();   // ← Tilføj denne
 }

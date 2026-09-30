@@ -8,5 +8,8 @@ public static class DatabaseInitializer
     {
         db.CreateTable<Category>(
             tableOptions: TableOptions.CreateIfNotExists);
+
+        db.CreateTable<Listing>(
+            tableOptions: TableOptions.CreateIfNotExists);
     }
 }
