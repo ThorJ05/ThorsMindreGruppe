@@ -1,101 +1,408 @@
-export class Api {
-  private base = "http://localhost:5000/api";
+/* eslint-disable */
+/* tslint:disable */
+// @ts-nocheck
+/*
+ * ---------------------------------------------------------------
+ * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
+ * ##                                                           ##
+ * ## AUTHOR: acacode                                           ##
+ * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
+ * ---------------------------------------------------------------
+ */
 
-  async categoryGetAll() {
-    const res = await fetch(`${this.base}/category`);
-    if (!res.ok) throw new Error("Failed to fetch categories");
-    return res.json();
+export interface CategoryDto {
+  /** @format int32 */
+  id?: number;
+  name?: string;
+  /** @format int32 */
+  parentCategoryId?: number | null;
+  isActive?: boolean;
+  /** @format int32 */
+  sortOrder?: number;
+  isRestricted?: boolean;
+  /** @format int32 */
+  minSoldOrders?: number | null;
+}
+
+export type QueryParamsType = Record<string | number, any>;
+export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
+
+export interface FullRequestParams extends Omit<RequestInit, "body"> {
+  /** set parameter to `true` for call `securityWorker` for this request */
+  secure?: boolean;
+  /** request path */
+  path: string;
+  /** content type of request body */
+  type?: ContentType;
+  /** query params */
+  query?: QueryParamsType;
+  /** format of response (i.e. response.json() -> format: "json") */
+  format?: ResponseFormat;
+  /** request body */
+  body?: unknown;
+  /** base url */
+  baseUrl?: string;
+  /** request cancellation token */
+  cancelToken?: CancelToken;
+}
+
+export type RequestParams = Omit<
+  FullRequestParams,
+  "body" | "method" | "query" | "path"
+>;
+
+export interface ApiConfig<SecurityDataType = unknown> {
+  baseUrl?: string;
+  baseApiParams?: Omit<RequestParams, "baseUrl" | "cancelToken" | "signal">;
+  securityWorker?: (
+    securityData: SecurityDataType | null,
+  ) => Promise<RequestParams | void> | RequestParams | void;
+  customFetch?: typeof fetch;
+}
+
+export interface HttpResponse<D extends unknown, E extends unknown = unknown>
+  extends Response {
+  data: D;
+  error: E;
+}
+
+type CancelToken = Symbol | string | number;
+
+export enum ContentType {
+  Json = "application/json",
+  JsonApi = "application/vnd.api+json",
+  FormData = "multipart/form-data",
+  UrlEncoded = "application/x-www-form-urlencoded",
+  Text = "text/plain",
+}
+
+export class HttpClient<SecurityDataType = unknown> {
+  public baseUrl: string = "http://localhost:5123";
+  private securityData: SecurityDataType | null = null;
+  private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
+  private abortControllers = new Map<CancelToken, AbortController>();
+  private customFetch = (...fetchParams: Parameters<typeof fetch>) =>
+    fetch(...fetchParams);
+
+  private baseApiParams: RequestParams = {
+    credentials: "same-origin",
+    headers: {},
+    redirect: "follow",
+    referrerPolicy: "no-referrer",
+  };
+
+  constructor(apiConfig: ApiConfig<SecurityDataType> = {}) {
+    Object.assign(this, apiConfig);
   }
 
-  async categoryGetById(id: number) {
-    const res = await fetch(`${this.base}/category/${id}`);
-    if (!res.ok) throw new Error("Failed to fetch category");
-    return res.json();
+  public setSecurityData = (data: SecurityDataType | null) => {
+    this.securityData = data;
+  };
+
+  protected encodeQueryParam(key: string, value: any) {
+    const encodedKey = encodeURIComponent(key);
+    return `${encodedKey}=${encodeURIComponent(typeof value === "number" ? value : `${value}`)}`;
   }
 
-  async categoryCreate(dto: any) {
-    const res = await fetch(`${this.base}/category`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dto),
+  protected addQueryParam(query: QueryParamsType, key: string) {
+    return this.encodeQueryParam(key, query[key]);
+  }
+
+  protected addArrayQueryParam(query: QueryParamsType, key: string) {
+    const value = query[key];
+    return value.map((v: any) => this.encodeQueryParam(key, v)).join("&");
+  }
+
+  protected toQueryString(rawQuery?: QueryParamsType): string {
+    const query = rawQuery || {};
+    const keys = Object.keys(query).filter(
+      (key) => "undefined" !== typeof query[key],
+    );
+    return keys
+      .map((key) =>
+        Array.isArray(query[key])
+          ? this.addArrayQueryParam(query, key)
+          : this.addQueryParam(query, key),
+      )
+      .join("&");
+  }
+
+  protected addQueryParams(rawQuery?: QueryParamsType): string {
+    const queryString = this.toQueryString(rawQuery);
+    return queryString ? `?${queryString}` : "";
+  }
+
+  private contentFormatters: Record<ContentType, (input: any) => any> = {
+    [ContentType.Json]: (input: any) =>
+      input !== null && (typeof input === "object" || typeof input === "string")
+        ? JSON.stringify(input)
+        : input,
+    [ContentType.JsonApi]: (input: any) =>
+      input !== null && (typeof input === "object" || typeof input === "string")
+        ? JSON.stringify(input)
+        : input,
+    [ContentType.Text]: (input: any) =>
+      input !== null && typeof input !== "string"
+        ? JSON.stringify(input)
+        : input,
+    [ContentType.FormData]: (input: any) => {
+      if (input instanceof FormData) {
+        return input;
+      }
+
+      return Object.keys(input || {}).reduce((formData, key) => {
+        const property = input[key];
+        formData.append(
+          key,
+          property instanceof Blob
+            ? property
+            : typeof property === "object" && property !== null
+              ? JSON.stringify(property)
+              : `${property}`,
+        );
+        return formData;
+      }, new FormData());
+    },
+    [ContentType.UrlEncoded]: (input: any) => this.toQueryString(input),
+  };
+
+  protected mergeRequestParams(
+    params1: RequestParams,
+    params2?: RequestParams,
+  ): RequestParams {
+    return {
+      ...this.baseApiParams,
+      ...params1,
+      ...(params2 || {}),
+      headers: {
+        ...(this.baseApiParams.headers || {}),
+        ...(params1.headers || {}),
+        ...((params2 && params2.headers) || {}),
+      },
+    };
+  }
+
+  protected createAbortSignal = (
+    cancelToken: CancelToken,
+  ): AbortSignal | undefined => {
+    if (this.abortControllers.has(cancelToken)) {
+      const abortController = this.abortControllers.get(cancelToken);
+      if (abortController) {
+        return abortController.signal;
+      }
+      return void 0;
+    }
+
+    const abortController = new AbortController();
+    this.abortControllers.set(cancelToken, abortController);
+    return abortController.signal;
+  };
+
+  public abortRequest = (cancelToken: CancelToken) => {
+    const abortController = this.abortControllers.get(cancelToken);
+
+    if (abortController) {
+      abortController.abort();
+      this.abortControllers.delete(cancelToken);
+    }
+  };
+
+  public request = async <T = any, E = any>({
+    body,
+    secure,
+    path,
+    type,
+    query,
+    format,
+    baseUrl,
+    cancelToken,
+    ...params
+  }: FullRequestParams): Promise<HttpResponse<T, E>> => {
+    const secureParams =
+      ((typeof secure === "boolean" ? secure : this.baseApiParams.secure) &&
+        this.securityWorker &&
+        (await this.securityWorker(this.securityData))) ||
+      {};
+    const requestParams = this.mergeRequestParams(params, secureParams);
+    const queryString = query && this.toQueryString(query);
+    const payloadFormatter = this.contentFormatters[type || ContentType.Json];
+    const responseFormat = format || requestParams.format;
+
+    return this.customFetch(
+      `${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`,
+      {
+        ...requestParams,
+        headers: {
+          ...(requestParams.headers || {}),
+          ...(type && type !== ContentType.FormData
+            ? { "Content-Type": type }
+            : {}),
+        },
+        signal:
+          (cancelToken
+            ? this.createAbortSignal(cancelToken)
+            : requestParams.signal) || null,
+        body:
+          typeof body === "undefined" || body === null
+            ? null
+            : payloadFormatter(body),
+      },
+    ).then(async (response) => {
+      const r = response as HttpResponse<T, E>;
+      r.data = null as unknown as T;
+      r.error = null as unknown as E;
+
+      const responseToParse = responseFormat ? response.clone() : response;
+      const data = !responseFormat
+        ? r
+        : await responseToParse[responseFormat]()
+            .then((data) => {
+              if (r.ok) {
+                r.data = data;
+              } else {
+                r.error = data;
+              }
+              return r;
+            })
+            .catch((e) => {
+              r.error = e;
+              return r;
+            });
+
+      if (cancelToken) {
+        this.abortControllers.delete(cancelToken);
+      }
+
+      if (!response.ok) throw data;
+      return data;
     });
-    if (!res.ok) throw new Error("Failed to create category");
-    return res.json();
-  }
+  };
+}
 
-  async categoryUpdate(id: number, dto: any) {
-    const res = await fetch(`${this.base}/category/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dto),
-    });
-    if (!res.ok) throw new Error("Failed to update category");
-    return res.json();
-  }
+/**
+ * @title My Title
+ * @version 1.0.0
+ * @baseUrl http://localhost:5123
+ */
+export class Api<
+  SecurityDataType extends unknown,
+> extends HttpClient<SecurityDataType> {
+  doSomething = {
+    /**
+     * No description
+     *
+     * @tags My
+     * @name MyDoSomething
+     * @request GET:/DoSomething
+     */
+    myDoSomething: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/DoSomething`,
+        method: "GET",
+        ...params,
+      }),
+  };
+  api = {
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryGetAll
+     * @request GET:/api/category
+     */
+    categoryGetAll: (params: RequestParams = {}) =>
+      this.request<CategoryDto[], any>({
+        path: `/api/category`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
 
-  async categorySetActive(id: number, isActive: boolean) {
-    const res = await fetch(`${this.base}/category/${id}/active`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(isActive),
-    });
-    if (!res.ok) throw new Error("Failed to set category active state");
-  }
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryCreate
+     * @request POST:/api/category
+     */
+    categoryCreate: (data: CategoryDto, params: RequestParams = {}) =>
+      this.request<CategoryDto, any>({
+        path: `/api/category`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
 
-  async categoryDelete(id: number) {
-    const res = await fetch(`${this.base}/category/${id}`, {
-      method: "DELETE",
-    });
-    if (!res.ok) throw new Error("Failed to delete category");
-  }
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryGetById
+     * @request GET:/api/category/{id}
+     */
+    categoryGetById: (id: number, params: RequestParams = {}) =>
+      this.request<CategoryDto, any>({
+        path: `/api/category/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
 
-  async listingGetAll() {
-    const res = await fetch(`${this.base}/listing`);
-    if (!res.ok) throw new Error("Failed to fetch listings");
-    return res.json();
-  }
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryUpdate
+     * @request PUT:/api/category/{id}
+     */
+    categoryUpdate: (
+      id: number,
+      data: CategoryDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<CategoryDto, any>({
+        path: `/api/category/${id}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
 
-  async listingGetById(id: number) {
-    const res = await fetch(`${this.base}/listing/${id}`);
-    if (!res.ok) throw new Error("Failed to fetch listing");
-    return res.json();
-  }
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryDelete
+     * @request DELETE:/api/category/{id}
+     */
+    categoryDelete: (id: number, params: RequestParams = {}) =>
+      this.request<Blob, any>({
+        path: `/api/category/${id}`,
+        method: "DELETE",
+        ...params,
+      }),
 
-  async listingCreate(dto: any) {
-    const res = await fetch(`${this.base}/listing`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dto),
-    });
-    if (!res.ok) throw new Error("Failed to create listing");
-    return res.json();
-  }
-
-  async listingUpdate(id: number, dto: any) {
-    const res = await fetch(`${this.base}/listing/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dto),
-    });
-    if (!res.ok) throw new Error("Failed to update listing");
-    return res.json();
-  }
-
-  async listingSetActive(id: number, active: boolean) {
-    const res = await fetch(`${this.base}/listing/${id}/active`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(active),
-    });
-    if (!res.ok) throw new Error("Failed to set listing active state");
-  }
-
-  async listingBulkUpdate(ids: number[], price?: number, stock?: number) {
-    const res = await fetch(`${this.base}/listing/bulk`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids, price, stock }),
-    });
-    if (!res.ok) throw new Error("Failed to bulk update listings");
-  }
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategorySetRestricted
+     * @request PATCH:/api/category/{id}/restricted
+     */
+    categorySetRestricted: (
+      id: number,
+      data: boolean,
+      params: RequestParams = {},
+    ) =>
+      this.request<Blob, any>({
+        path: `/api/category/${id}/restricted`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+  };
 }
