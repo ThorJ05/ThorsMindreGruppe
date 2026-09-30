@@ -34,11 +34,11 @@ app.UseSwaggerUi();
 
 app.Run();
 
-public class MyController : ControllerBase
+/*public class MyController : ControllerBase
 {
     [HttpGet(nameof(DoSomething))]
     public void DoSomething()
     {
         
-    }
-}
+    } 
+}*/
