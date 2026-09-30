@@ -17,6 +17,8 @@ builder.Services.AddLinqToDBContext<AppDb>((provider, options) =>
         builder.Configuration.GetConnectionString("Default")!
     ));
 
+builder.Services.AddScoped<IListingRepository, ListingRepository>();
+
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {

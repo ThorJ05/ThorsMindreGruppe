@@ -51,7 +51,7 @@ public class CategoryController : ControllerBase
         var updated = await _service.UpdateAsync(id, category);
         if (updated == null)
             return NotFound();
-        
+
         return Ok(updated);
     }
 
@@ -66,12 +66,23 @@ public class CategoryController : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id)
+    [HttpPatch("{id:int}/restricted")]
+    public async Task<IActionResult> SetRestricted(
+        int id,
+        [FromBody] bool isRestricted)
     {
-        var success = await _service.DeleteAsync(id);
+        var success = await _service.SetRestrictedAsync(id, isRestricted);
         if (!success)
             return NotFound();
+        return NoContent();
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id, [FromQuery] int? moveListingsToCategoryId)
+    {
+        var (success, error) = await _service.DeleteAsync(id, moveListingsToCategoryId);
+        if (!success)
+            return BadRequest(error);
         return NoContent();
     }
 }

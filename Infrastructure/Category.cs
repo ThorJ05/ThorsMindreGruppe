@@ -15,6 +15,7 @@ public class Category
     [Column] public bool IsActive { get; set; } = true;
     // Controls the order of the categories
     [Column] public int SortOrder { get; set; }
+    [Column] public bool IsRestricted { get; set; } = false;
     // Minimum amount of sold orders needed for the category
     [Column] public int? MinSoldOrders { get; set; }    
 }

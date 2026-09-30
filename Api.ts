@@ -10,6 +10,20 @@
  * ---------------------------------------------------------------
  */
 
+export interface CategoryDto {
+  /** @format int32 */
+  id?: number;
+  name?: string;
+  /** @format int32 */
+  parentCategoryId?: number | null;
+  isActive?: boolean;
+  /** @format int32 */
+  sortOrder?: number;
+  isRestricted?: boolean;
+  /** @format int32 */
+  minSoldOrders?: number | null;
+}
+
 export type QueryParamsType = Record<string | number, any>;
 export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
 
@@ -285,6 +299,109 @@ export class Api<
       this.request<void, any>({
         path: `/DoSomething`,
         method: "GET",
+        ...params,
+      }),
+  };
+  api = {
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryGetAll
+     * @request GET:/api/category
+     */
+    categoryGetAll: (params: RequestParams = {}) =>
+      this.request<CategoryDto[], any>({
+        path: `/api/category`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryCreate
+     * @request POST:/api/category
+     */
+    categoryCreate: (data: CategoryDto, params: RequestParams = {}) =>
+      this.request<CategoryDto, any>({
+        path: `/api/category`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryGetById
+     * @request GET:/api/category/{id}
+     */
+    categoryGetById: (id: number, params: RequestParams = {}) =>
+      this.request<CategoryDto, any>({
+        path: `/api/category/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryUpdate
+     * @request PUT:/api/category/{id}
+     */
+    categoryUpdate: (
+      id: number,
+      data: CategoryDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<CategoryDto, any>({
+        path: `/api/category/${id}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryDelete
+     * @request DELETE:/api/category/{id}
+     */
+    categoryDelete: (id: number, params: RequestParams = {}) =>
+      this.request<Blob, any>({
+        path: `/api/category/${id}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategorySetRestricted
+     * @request PATCH:/api/category/{id}/restricted
+     */
+    categorySetRestricted: (
+      id: number,
+      data: boolean,
+      params: RequestParams = {},
+    ) =>
+      this.request<Blob, any>({
+        path: `/api/category/${id}/restricted`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };

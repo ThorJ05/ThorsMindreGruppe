@@ -9,4 +9,5 @@ public class AppDb : DataConnection
     public AppDb(DataOptions<AppDb> options) : base(options.Options) { }
     // Gives us access to the Category table
     public ITable<Category> Categories => this.GetTable<Category>();
+    public ITable<Listing> Listings => this.GetTable<Listing>();
 }
