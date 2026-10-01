@@ -10,21 +10,22 @@ export default function CategoryPage() {
     const [editId, setEditId] = useState<number | null>(null);
 
     useEffect(() => { load(); }, []);
-
-    // Ask server for the latest list.
+    
+    
+// Ask server for the latest list.
     function load() {
-        api.categoryGetAll().then(setCategories);
+        api.api.categoryGetAll().then(res => setCategories(res.data));
     }
 
-    // Create or update depending on editId.
+// Create or update depending on editId.
     async function save() {
         if (!name.trim()) return alert("Name required");
 
         if (editId) {
-            await api.categoryUpdate(editId, { name });
+            await api.api.categoryUpdate(editId, { name });
             alert("Category updated");
         } else {
-            await api.categoryCreate({ name });
+            await api.api.categoryCreate({ name });
             alert("Category created");
         }
 
@@ -34,16 +35,16 @@ export default function CategoryPage() {
         load();
     }
 
-    // Confirm then delete.
+// Confirm then delete.
     async function remove(id: number) {
         if (!confirm("Delete category?")) return;
-        await api.categoryDelete(id);
+        await api.api.categoryDelete(id);
         load();
     }
 
-    // Flip the isActive flag.
+// Flip the isActive flag.
     async function toggleActive(cat: any) {
-        await api.categorySetActive(cat.id, !cat.isActive);
+        await api.api.categorySetActive(cat.id, !cat.isActive);
         load();
     }
 

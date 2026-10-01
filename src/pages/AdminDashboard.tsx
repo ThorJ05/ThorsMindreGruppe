@@ -10,8 +10,8 @@ export default function AdminDashboard() {
 
     // Fetch both lists in parallel.
     useEffect(() => {
-        Promise.all([api.listingGetAll(), api.categoryGetAll()])
-            .then(([l, c]) => { setListings(l); setCategories(c); setLoading(false); });
+        Promise.all([api.api.listingGetAll(), api.api.categoryGetAll()])
+            .then(([l, c]) => { setListings(l.data); setCategories(c.data); setLoading(false); });
     }, []);
 
     if (loading) return <p>Loading...</p>;

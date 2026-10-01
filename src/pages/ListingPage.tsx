@@ -10,8 +10,8 @@ export default function ListingPage() {
 
     // Runs once when the page appears.
     useEffect(() => {
-        api.listingGetAll()
-            .then(setListings)
+        api.api.listingGetAll()
+            .then(res => setListings(res.data))
             .finally(() => setLoading(false));
     }, []);
 

@@ -10,9 +10,9 @@ export default function BulkEditPage() {
     const [stock, setStock] = useState<number | undefined>(undefined);
 
     useEffect(() => {
-        api.listingGetAll().then(setListings);
+        api.api.listingGetAll().then(res => setListings(res.data));
     }, []);
-
+    
     function toggleSelect(id: number) {
         if (selectedIds.includes(id)) {
             setSelectedIds(selectedIds.filter(x => x !== id));
