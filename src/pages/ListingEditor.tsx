@@ -18,12 +18,13 @@ export default function ListingEditor({ listingId }: { listingId?: number }) {
 
     useEffect(() => {
         // Load categories for the dropdown.
-        api.categoryGetAll().then(setCategories);
+        api.api.categoryGetAll().then(res => setCategories(res.data));
+
         // If editing, load the existing listing into the form.
-        if (listingId) api.listingGetById(listingId).then(setListing);
+        if (listingId) api.api.listingGetById(listingId).then(res => setListing(res.data));
     }, [listingId]);
 
-    // Build the payload and send it.
+// Build the payload and send it.
     function save() {
         const dto = {
             title: listing.title, price: listing.price, stock: listing.stock,
@@ -33,8 +34,8 @@ export default function ListingEditor({ listingId }: { listingId?: number }) {
             images: listing.images, discount: listing.discount,
         };
 
-        if (listingId) api.listingUpdate(listingId, dto).then(() => alert("Updated!"));
-        else           api.listingCreate(dto).then(() => alert("Created!"));
+        if (listingId) api.api.listingUpdate(listingId, dto).then(() => alert("Updated!"));
+        else           api.api.listingCreate(dto).then(() => alert("Created!"));
     }
 
     // Add the typed tag as a tag object.
