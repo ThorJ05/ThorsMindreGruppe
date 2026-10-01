@@ -1,5 +1,5 @@
 export class Api {
-  private base = "http://localhost:5000/api";
+  private base = "http://localhost:5123/api";
 
   async categoryGetAll() {
     const res = await fetch(`${this.base}/category`);
@@ -99,3 +99,5 @@ export class Api {
     if (!res.ok) throw new Error("Failed to bulk update listings");
   }
 }
+
+export const api = new Api();
