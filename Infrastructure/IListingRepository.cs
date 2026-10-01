@@ -1,6 +1,3 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-
 namespace Infrastructure;
 
 public interface IListingRepository
@@ -9,5 +6,8 @@ public interface IListingRepository
     Task<Listing?> GetByIdAsync(int id);
     Task<int> AddAsync(Listing listing);
     Task UpdateAsync(Listing listing);
-    Task DeleteAsync(int id);
+
+    // Used by category deletion (issue #4)
+    Task<int> CountByCategoryAsync(int categoryId);
+    Task MoveCategoryAsync(int fromCategoryId, int toCategoryId);
 }

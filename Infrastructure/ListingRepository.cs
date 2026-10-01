@@ -1,4 +1,4 @@
-﻿using LinqToDB;
+using LinqToDB;
 using LinqToDB.Async;
 
 namespace Infrastructure;
@@ -17,9 +17,14 @@ public class ListingRepository : IListingRepository
     public Task<int> AddAsync(Listing listing) =>
         _db.InsertWithInt32IdentityAsync(listing);
 
-    public Task UpdateAsync(Listing listing) =>
-        _db.UpdateAsync(listing);
+    public async Task UpdateAsync(Listing listing) =>
+        await _db.UpdateAsync(listing);
 
-    public Task DeleteAsync(int id) =>
-        _db.Listings.Where(l => l.Id == id).DeleteAsync();
+    public Task<int> CountByCategoryAsync(int categoryId) =>
+        _db.Listings.Where(l => l.CategoryId == categoryId).CountAsync();
+
+    public Task MoveCategoryAsync(int fromCategoryId, int toCategoryId) =>
+        _db.Listings.Where(l => l.CategoryId == fromCategoryId)
+            .Set(l => l.CategoryId, toCategoryId)
+            .UpdateAsync();
 }
