@@ -1,0 +1,210 @@
+/* === Black Templar reliquary theme === */
+
+:root {
+    --void: #0a0a0b;
+    --iron: #1c1c1f;
+    --iron-line: #35353a;
+    --bone: #e6ded0;
+    --bone-dim: #a9a08c;
+    --blood: #6e0f0f;
+    --blood-bright: #9c1515;
+    --brass: #8a6a33;
+
+    --font-display: "Cinzel Decorative", "Cinzel", serif;
+    --font-body: "EB Garamond", Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--void);
+    color: var(--bone);
+    font-family: var(--font-body);
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+body {
+    background-image:
+            repeating-linear-gradient(
+                    0deg,
+                    rgba(255, 255, 255, 0.015) 0px,
+                    rgba(255, 255, 255, 0.015) 1px,
+                    transparent 1px,
+                    transparent 3px
+            );
+}
+
+h1, h2, h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--bone);
+    margin: 0 0 0.6em;
+    line-height: 1.15;
+}
+
+h1 { font-size: 2.6rem; }
+h2 { font-size: 1.7rem; }
+h3 { font-size: 1.25rem; }
+
+a {
+    color: var(--bone);
+    text-decoration: none;
+    border-bottom: 1px solid var(--iron-line);
+}
+a:hover { border-bottom-color: var(--brass); }
+
+.bt-nav {
+    background: var(--iron);
+    border-bottom: 2px solid var(--void);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+.bt-nav a {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    color: var(--bone-dim);
+    border-bottom: none;
+}
+.bt-nav a:hover,
+.bt-nav a.active {
+    color: var(--bone);
+}
+
+.bt-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2.5rem 0;
+    color: var(--iron-line);
+}
+.bt-divider::before,
+.bt-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--iron-line);
+}
+.bt-divider span {
+    padding: 0 1rem;
+    font-size: 1.1rem;
+}
+
+.bt-panel {
+    background: var(--bone);
+    color: #1a1611;
+    border: 1px solid var(--void);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+    padding: 1.5rem;
+}
+.bt-panel h2, .bt-panel h3 { color: #1a1611; }
+
+.bt-relic {
+    background: var(--iron);
+    border: 1px solid var(--iron-line);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+.bt-relic.featured {
+    border-color: var(--brass);
+    box-shadow: 0 0 0 1px var(--brass);
+}
+.bt-relic .relic-name {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+}
+.bt-relic .relic-price {
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+.bt-relic .relic-meta {
+    font-size: 0.85rem;
+    color: var(--bone-dim);
+}
+
+.bt-tag {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+    border: 1px solid var(--iron-line);
+    color: var(--bone-dim);
+}
+.bt-tag.danger {
+    border-color: var(--blood-bright);
+    color: var(--blood-bright);
+}
+.bt-tag.brass {
+    border-color: var(--brass);
+    color: var(--brass);
+}
+
+.bt-btn {
+    font-family: var(--font-display);
+    background: transparent;
+    border: 1px solid var(--bone-dim);
+    color: var(--bone);
+    padding: 0.55rem 1.3rem;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+}
+.bt-btn:hover {
+    border-color: var(--brass);
+    color: var(--brass);
+}
+.bt-btn.danger {
+    border-color: var(--blood);
+    color: var(--blood-bright);
+}
+.bt-btn.danger:hover {
+    background: var(--blood);
+    color: var(--bone);
+}
+
+/* Buttons inside a light parchment panel need dark text, not bone */
+.bt-panel .bt-btn {
+    color: #1a1611;
+    border-color: #1a1611;
+}
+.bt-panel .bt-btn:hover {
+    border-color: var(--brass);
+    color: var(--brass);
+}
+.bt-panel .bt-btn.danger {
+    color: var(--blood);
+    border-color: var(--blood);
+}
+.bt-panel .bt-btn.danger:hover {
+    background: var(--blood);
+    color: var(--bone);
+}
+
+.bt-input, .bt-select {
+    background: var(--void);
+    border: 1px solid var(--iron-line);
+    color: var(--bone);
+    padding: 0.5rem 0.7rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+}
+.bt-input:focus, .bt-select:focus {
+    outline: 2px solid var(--brass);
+    outline-offset: 1px;
+}
+
+.bt-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+}

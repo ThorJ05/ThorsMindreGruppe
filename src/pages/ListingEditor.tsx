@@ -1,63 +1,44 @@
 ﻿import { useEffect, useState } from "react";
-import { Api } from "../Api";
+import { useParams } from "react-router-dom";
+import { Api, CategoryDto, ListingDto } from "../Api";
 
 const api = new Api();
 
-// listingId present = edit mode; missing = create mode.
-export default function ListingEditor({ listingId }: { listingId?: number }) {
-    // All form fields live in one object.
-    const [listing, setListing] = useState<any>({
-        title: "", price: 0, stock: 0, lowStockThreshold: 0,
-        isActive: true, isOutOfStock: false,
-        categoryId: null, tags: [], images: [], discount: null,
+export default function ListingEditor() {
+    const { id } = useParams();
+    const listingId = id ? Number(id) : undefined;
+
+    const [listing, setListing] = useState<ListingDto>({
+        title: "",
+        description: "",
+        price: 0,
+        stock: 0,
+        lowStockThreshold: 0,
+        isActive: true,
+        isOutOfStock: false,
+        categoryId: 0,
     });
 
-    const [categories, setCategories] = useState<any[]>([]);
-    const [tagInput, setTagInput] = useState("");
-    const [imageUrl, setImageUrl] = useState("");
+    const [categories, setCategories] = useState<CategoryDto[]>([]);
 
     useEffect(() => {
-        // Load categories for the dropdown.
         api.api.categoryGetAll().then(res => setCategories(res.data));
-
-        // If editing, load the existing listing into the form.
-        if (listingId) api.api.listingGetById(listingId).then(res => setListing(res.data));
+        if (listingId) {
+            api.api.listingGetById(listingId).then(res => setListing(res.data));
+        }
     }, [listingId]);
 
-// Build the payload and send it.
-    function save() {
-        const dto = {
-            title: listing.title, price: listing.price, stock: listing.stock,
-            lowStockThreshold: listing.lowStockThreshold,
-            isActive: listing.isActive, isOutOfStock: listing.isOutOfStock,
-            categoryId: listing.categoryId, tags: listing.tags,
-            images: listing.images, discount: listing.discount,
-        };
+    async function save() {
+        if (!listing.title?.trim()) return alert("Title required");
+        if (!listing.categoryId) return alert("Category required");
 
-        if (listingId) api.api.listingUpdate(listingId, dto).then(() => alert("Updated!"));
-        else           api.api.listingCreate(dto).then(() => alert("Created!"));
-    }
-
-    // Add the typed tag as a tag object.
-    function addTag() {
-        if (!tagInput.trim()) return;
-        setListing({ ...listing, tags: [...listing.tags, { name: tagInput }] });
-        setTagInput("");
-    }
-
-    // Add the typed URL as an image object.
-    function addImage() {
-        if (!imageUrl.trim()) return;
-        setListing({ ...listing, images: [...listing.images, { url: imageUrl }] });
-        setImageUrl("");
-    }
-
-    // Ask for discount info, then store it.
-    function addDiscount() {
-        const amount = Number(prompt("Discount amount:"));
-        const expires = prompt("Expires at (YYYY-MM-DD):");
-        if (!amount || !expires) return;
-        setListing({ ...listing, discount: { amount, expiresAt: expires } });
+        if (listingId) {
+            await api.api.listingUpdate(listingId, listing);
+            alert("Listing updated");
+        } else {
+            await api.api.listingCreate(listing);
+            alert("Listing created");
+        }
     }
 
     return (
@@ -65,74 +46,102 @@ export default function ListingEditor({ listingId }: { listingId?: number }) {
             <h1>{listingId ? "Edit Listing" : "Create Listing"}</h1>
 
             <label>Title</label>
-            {/* ...listing copies existing fields, then we overwrite one. */}
-            <input value={listing.title} onChange={e => setListing({ ...listing, title: e.target.value })} />
+            <input
+                className="bt-input"
+                style={{ width: "100%", marginBottom: "1rem" }}
+                value={listing.title ?? ""}
+                onChange={e => setListing({ ...listing, title: e.target.value })}
+            />
+
+            <label>Description</label>
+            <textarea
+                className="bt-input"
+                style={{ width: "100%", marginBottom: "1rem", minHeight: "80px" }}
+                value={listing.description ?? ""}
+                onChange={e => setListing({ ...listing, description: e.target.value })}
+            />
 
             <label>Price</label>
-            <input type="number" value={listing.price} onChange={e => setListing({ ...listing, price: Number(e.target.value) })} />
+            <input
+                className="bt-input"
+                style={{ width: "100%", marginBottom: "1rem" }}
+                type="text"
+                inputMode="numeric"
+                value={listing.price ?? 0}
+                onFocus={e => e.target.select()}
+                onChange={e => {
+                    if (!/^\d*$/.test(e.target.value)) return;
+                    setListing({ ...listing, price: e.target.value ? Number(e.target.value) : 0 });
+                }}
+            />
 
             <label>Stock</label>
-            <input type="number" value={listing.stock} onChange={e => setListing({ ...listing, stock: Number(e.target.value) })} />
+            <input
+                className="bt-input"
+                style={{ width: "100%", marginBottom: "1rem" }}
+                type="text"
+                inputMode="numeric"
+                value={listing.stock ?? 0}
+                onFocus={e => e.target.select()}
+                onChange={e => {
+                    if (!/^\d*$/.test(e.target.value)) return;
+                    const newStock = e.target.value ? Number(e.target.value) : 0;
+                    setListing({ ...listing, stock: newStock, isOutOfStock: newStock === 0 });
+                }}
+            />
 
             <label>Low Stock Threshold</label>
-            <input type="number" value={listing.lowStockThreshold} onChange={e => setListing({ ...listing, lowStockThreshold: Number(e.target.value) })} />
+            <input
+                className="bt-input"
+                style={{ width: "100%", marginBottom: "1rem" }}
+                type="text"
+                inputMode="numeric"
+                value={listing.lowStockThreshold ?? 0}
+                onFocus={e => e.target.select()}
+                onChange={e => {
+                    if (!/^\d*$/.test(e.target.value)) return;
+                    setListing({
+                        ...listing,
+                        lowStockThreshold: e.target.value ? Number(e.target.value) : 0,
+                    });
+                }}
+            />
 
             <label>Category</label>
-            <select value={listing.categoryId || ""} onChange={e => setListing({ ...listing, categoryId: Number(e.target.value) })}>
-                <option value="">Select category</option>
-                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            <select
+                className="bt-select"
+                style={{ width: "100%", marginBottom: "1rem" }}
+                value={listing.categoryId ?? ""}
+                onChange={e => setListing({ ...listing, categoryId: Number(e.target.value) })}
+            >
+                <option value="">Select a category</option>
+                {categories.map(c => (
+                    <option key={c.id} value={c.id}>
+                        {c.name}
+                    </option>
+                ))}
             </select>
 
-            {/* Tags: input + Add button, then chips below. */}
-            <label>Tags</label>
-            <div>
-                <input value={tagInput} onChange={e => setTagInput(e.target.value)} placeholder="Add tag" />
-                <button onClick={addTag}>Add</button>
-            </div>
-            <div>
-                {listing.tags.map((t: any, i: number) => (
-                    <span key={i} style={{ background: "#fbf0df", color: "#1a1a1a", padding: "0.2rem 0.5rem", borderRadius: "6px", marginRight: "0.3rem" }}>
-            {t.name}
-          </span>
-                ))}
-            </div>
-
-            {/* Images: URL input + Add, then thumbnails. */}
-            <label>Images</label>
-            <div>
-                <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="Image URL" />
-                <button onClick={addImage}>Add</button>
-            </div>
-            <div>
-                {listing.images.map((img: any, i: number) => (
-                    <img key={i} src={img.url} alt="" style={{ width: "80px", height: "80px", objectFit: "cover", marginRight: "0.5rem" }} />
-                ))}
-            </div>
-
-            {/* Two status checkboxes. */}
-            <label>Status</label>
-            <div>
-                <label>
-                    <input type="checkbox" checked={listing.isActive} onChange={e => setListing({ ...listing, isActive: e.target.checked })} />
+            <div style={{ marginBottom: "1.5rem" }}>
+                <label style={{ marginRight: "1.5rem" }}>
+                    <input
+                        type="checkbox"
+                        checked={listing.isActive ?? true}
+                        onChange={e => setListing({ ...listing, isActive: e.target.checked })}
+                    />{" "}
                     Active
                 </label>
                 <label>
-                    <input type="checkbox" checked={listing.isOutOfStock} onChange={e => setListing({ ...listing, isOutOfStock: e.target.checked })} />
-                    Out of Stock
+                    <input
+                        type="checkbox"
+                        checked={listing.isOutOfStock ?? false}
+                        onChange={e => setListing({ ...listing, isOutOfStock: e.target.checked })}
+                    />{" "}
+                    Out of stock
                 </label>
             </div>
 
-            {/* Discount: opened by button, shows the current value. */}
-            <label>Discount</label>
-            <button onClick={addDiscount}>Add Discount</button>
-            {listing.discount && (
-                <p>
-                    Discount: {listing.discount.amount} kr<br />
-                    Expires: {listing.discount.expiresAt}
-                </p>
-            )}
-
-            <button onClick={save} style={{ marginTop: "1rem", padding: "0.7rem 1.5rem", background: "#fbf0df", color: "#1a1a1a", borderRadius: "8px", fontWeight: "bold" }}>
+            <button className="bt-btn" onClick={save}>
                 Save
             </button>
         </div>

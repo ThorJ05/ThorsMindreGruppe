@@ -1,24 +1,26 @@
 ﻿import { useEffect, useState } from "react";
-import { Api } from "../Api";
+import { Api, ListingDto } from "../Api";
 
 const api = new Api();
 
 export default function BulkEditPage() {
-    const [listings, setListings] = useState<any[]>([]);
+    const [listings, setListings] = useState<ListingDto[]>([]);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [price, setPrice] = useState<number | undefined>(undefined);
     const [stock, setStock] = useState<number | undefined>(undefined);
 
     useEffect(() => {
-        api.api.listingGetAll().then(res => setListings(res.data));
+        load();
     }, []);
-    
+
+    function load() {
+        api.api.listingGetAll().then(res => setListings(res.data));
+    }
+
     function toggleSelect(id: number) {
-        if (selectedIds.includes(id)) {
-            setSelectedIds(selectedIds.filter(x => x !== id));
-        } else {
-            setSelectedIds([...selectedIds, id]);
-        }
+        setSelectedIds(prev =>
+            prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+        );
     }
 
     async function applyBulkUpdate() {
@@ -27,85 +29,69 @@ export default function BulkEditPage() {
             return;
         }
 
-        await api.listingBulkUpdate(selectedIds, price, stock);
-        alert("Bulk update applied!");
+        await api.api.listingBulkUpdate({
+            ids: selectedIds,
+            price: price,
+            stock: stock,
+        });
 
-        // Reload listings
-        api.listingGetAll().then(setListings);
+        alert("Bulk update applied");
+        load();
     }
 
     return (
         <div style={{ padding: "2rem" }}>
-            <h1>Bulk Edit Listings</h1>
+            <h1>Bulk Edit</h1>
 
-            <div style={{ marginBottom: "1rem" }}>
-                <label>New Price (optional)</label>
-                <input
-                    type="number"
-                    value={price ?? ""}
-                    onChange={e => setPrice(e.target.value ? Number(e.target.value) : undefined)}
-                />
-
-                <label style={{ marginLeft: "1rem" }}>New Stock (optional)</label>
-                <input
-                    type="number"
-                    value={stock ?? ""}
-                    onChange={e => setStock(e.target.value ? Number(e.target.value) : undefined)}
-                />
-
-                <button
-                    onClick={applyBulkUpdate}
-                    style={{
-                        marginLeft: "1rem",
-                        padding: "0.5rem 1rem",
-                        background: "#fbf0df",
-                        color: "#1a1a1a",
-                        borderRadius: "8px",
-                        fontWeight: "bold"
-                    }}
-                >
-                    Apply Bulk Update
+            <div style={{ marginBottom: "1.5rem", display: "flex", gap: "1rem", alignItems: "center" }}>
+                <div>
+                    <label>New price</label>
+                    <br />
+                    <input
+                        className="bt-input"
+                        type="text"
+                        inputMode="numeric"
+                        value={price ?? ""}
+                        onFocus={e => e.target.select()}
+                        onChange={e => {
+                            if (!/^\d*$/.test(e.target.value)) return;
+                            setPrice(e.target.value ? Number(e.target.value) : undefined);
+                        }}
+                    />
+                </div>
+                <div>
+                    <label>New stock</label>
+                    <br />
+                    <input
+                        className="bt-input"
+                        type="text"
+                        inputMode="numeric"
+                        value={stock ?? ""}
+                        onFocus={e => e.target.select()}
+                        onChange={e => {
+                            if (!/^\d*$/.test(e.target.value)) return;
+                            setStock(e.target.value ? Number(e.target.value) : undefined);
+                        }}
+                    />
+                </div>
+                <button className="bt-btn" style={{ marginTop: "1.4rem" }} onClick={applyBulkUpdate}>
+                    Apply to selected
                 </button>
             </div>
 
-            <div style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-                gap: "1rem"
-            }}>
+            <div className="bt-grid">
                 {listings.map(listing => (
-                    <div key={listing.id} style={{
-                        border: "1px solid #ccc",
-                        borderRadius: "12px",
-                        padding: "1rem",
-                        background: "#1a1a1a",
-                        color: "#fbf0df"
-                    }}>
+                    <div key={listing.id} className="bt-relic">
                         <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                             <input
                                 type="checkbox"
-                                checked={selectedIds.includes(listing.id)}
-                                onChange={() => toggleSelect(listing.id)}
+                                checked={selectedIds.includes(listing.id!)}
+                                onChange={() => toggleSelect(listing.id!)}
                             />
-                            <strong>{listing.title}</strong>
+                            <span className="relic-name">{listing.title}</span>
                         </label>
-
-                        <p>Price: {listing.price} kr</p>
-                        <p>Stock: {listing.stock}</p>
-
-                        {listing.images?.length > 0 && (
-                            <img
-                                src={listing.images[0].url}
-                                alt=""
-                                style={{
-                                    width: "100%",
-                                    height: "140px",
-                                    objectFit: "cover",
-                                    borderRadius: "8px",
-                                    marginTop: "0.5rem"
-                                }}
-                            />
-                        )}
+                        <div className="relic-price">{listing.price} credits</div>
+                        <div className="relic-meta">Stock: {listing.stock}</div>
                     </div>
                 ))}
             </div>
