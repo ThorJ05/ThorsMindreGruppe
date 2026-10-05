@@ -11,4 +11,7 @@ public class ListingDto
     public bool IsActive { get; set; }
     public bool IsOutOfStock { get; set; }
     public int CategoryId { get; set; }
+    public string? ImageUrl { get; set; }
 }
+
+public record BulkUpdateRequest(List<int> Ids, decimal? Price, int? Stock);

@@ -1,37 +1,25 @@
 import { serve } from "bun";
 import index from "./index.html";
 
-const server = serve({
+const BACKEND = "http://localhost:5123";
+
+serve({
   routes: {
-    "/*": index,
-
-    "/api/hello": {
-      async GET(req) {
-        return Response.json({
-          message: "Hello, world!",
-          method: "GET",
-        });
-      },
-      async PUT(req) {
-        return Response.json({
-          message: "Hello, world!",
-          method: "PUT",
-        });
-      },
-    },
-
-    "/api/hello/:name": async req => {
-      const name = req.params.name;
-      return Response.json({
-        message: `Hello, ${name}!`,
+    // Proxy /api/* to the .NET backend so Api.ts's relative paths work locally.
+    "/api/*": async (req) => {
+      const url = new URL(req.url);
+      return fetch(BACKEND + url.pathname + url.search, {
+        method: req.method,
+        headers: req.headers,
+        body: ["GET", "HEAD"].includes(req.method) ? undefined : req.body,
       });
     },
-  },
 
+    // Serve the React app for everything else.
+    "/*": index,
+  },
   development: process.env.NODE_ENV !== "production" && {
     hmr: true,
     console: true,
   },
 });
-
-console.log(`🚀 Server running at ${server.url}`);

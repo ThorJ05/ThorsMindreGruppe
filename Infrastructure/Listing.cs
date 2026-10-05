@@ -14,4 +14,5 @@ public class Listing
     [Column, NotNull] public bool IsActive { get; set; } = true;
     [Column, NotNull] public bool IsOutOfStock { get; set; }
     [Column, NotNull] public int CategoryId { get; set; }
+    [Column] public string? ImageUrl { get; set; }
 }

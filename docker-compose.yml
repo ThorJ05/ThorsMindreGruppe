@@ -1,0 +1,26 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: API/Dockerfile
+    container_name: thorsmindre-api
+    volumes:
+      - api-data:/app/data
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Data Source=/app/data/app.db
+    expose:
+      - "8080"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: thorsmindre-web
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  api-data:
