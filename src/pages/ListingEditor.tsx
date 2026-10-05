@@ -1,43 +1,96 @@
 ﻿import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Api, CategoryDto, ListingDto } from "../Api";
+import { useParams, useNavigate } from "react-router-dom";
+import { api, type CategoryDto, type ListingDto } from "../Api";
 
-const api = new Api();
+type FormState = {
+    title: string;
+    description: string;
+    imageUrl: string;
+    price: number | "";
+    stock: number | "";
+    lowStockThreshold: number | "";
+    isActive: boolean;
+    categoryId: number;
+};
+
+const emptyForm: FormState = {
+    title: "",
+    description: "",
+    imageUrl: "",
+    price: "",
+    stock: "",
+    lowStockThreshold: "",
+    isActive: true,
+    categoryId: 0,
+};
 
 export default function ListingEditor() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const listingId = id ? Number(id) : undefined;
 
-    const [listing, setListing] = useState<ListingDto>({
-        title: "",
-        description: "",
-        price: 0,
-        stock: 0,
-        lowStockThreshold: 0,
-        isActive: true,
-        isOutOfStock: false,
-        categoryId: 0,
-    });
-
+    const [listing, setListing] = useState<FormState>(emptyForm);
     const [categories, setCategories] = useState<CategoryDto[]>([]);
 
     useEffect(() => {
-        api.api.categoryGetAll().then(res => setCategories(res.data));
+        api.api.categoryGetAll()
+            .then(r => setCategories(r.data))
+            .catch(console.error);
+
         if (listingId) {
-            api.api.listingGetById(listingId).then(res => setListing(res.data));
+            api.api.listingGetById(listingId)
+                .then(r => {
+                    const l = r.data;
+                    setListing({
+                        title: l.title ?? "",
+                        description: l.description ?? "",
+                        imageUrl: l.imageUrl ?? "",
+                        price: l.price ?? "",
+                        stock: l.stock ?? "",
+                        lowStockThreshold: l.lowStockThreshold ?? "",
+                        isActive: l.isActive ?? true,
+                        categoryId: l.categoryId ?? 0,
+                    });
+                })
+                .catch(console.error);
         }
     }, [listingId]);
 
-    async function save() {
-        if (!listing.title?.trim()) return alert("Title required");
-        if (!listing.categoryId) return alert("Category required");
+    function numOrEmpty(raw: string): number | "" {
+        if (raw === "") return "";
+        const n = Number(raw);
+        return Number.isNaN(n) ? "" : n;
+    }
 
-        if (listingId) {
-            await api.api.listingUpdate(listingId, listing);
-            alert("Listing updated");
-        } else {
-            await api.api.listingCreate(listing);
-            alert("Listing created");
+    async function save() {
+        if (!listing.categoryId) {
+            alert("Please pick a category");
+            return;
+        }
+
+        const dto: ListingDto = {
+            title: listing.title,
+            description: listing.description,
+            imageUrl: listing.imageUrl,
+            price: listing.price === "" ? 0 : listing.price,
+            stock: listing.stock === "" ? 0 : listing.stock,
+            lowStockThreshold: listing.lowStockThreshold === "" ? 0 : listing.lowStockThreshold,
+            isActive: listing.isActive,
+            categoryId: listing.categoryId,
+        };
+
+        try {
+            if (listingId) {
+                await api.api.listingUpdate(listingId, dto);
+                alert("Updated!");
+            } else {
+                await api.api.listingCreate(dto);
+                alert("Created!");
+            }
+            navigate("/");
+        } catch (err) {
+            console.error(err);
+            alert("Save failed");
         }
     }
 
@@ -46,104 +99,49 @@ export default function ListingEditor() {
             <h1>{listingId ? "Edit Listing" : "Create Listing"}</h1>
 
             <label>Title</label>
-            <input
-                className="bt-input"
-                style={{ width: "100%", marginBottom: "1rem" }}
-                value={listing.title ?? ""}
-                onChange={e => setListing({ ...listing, title: e.target.value })}
-            />
+            <input value={listing.title}
+                   onChange={e => setListing({ ...listing, title: e.target.value })} />
 
             <label>Description</label>
-            <textarea
-                className="bt-input"
-                style={{ width: "100%", marginBottom: "1rem", minHeight: "80px" }}
-                value={listing.description ?? ""}
-                onChange={e => setListing({ ...listing, description: e.target.value })}
-            />
+            <input value={listing.description}
+                   onChange={e => setListing({ ...listing, description: e.target.value })} />
+
+            <label>Image URL</label>
+            <input value={listing.imageUrl}
+                   onChange={e => setListing({ ...listing, imageUrl: e.target.value })}
+                   placeholder="https://picsum.photos/400" />
 
             <label>Price</label>
-            <input
-                className="bt-input"
-                style={{ width: "100%", marginBottom: "1rem" }}
-                type="text"
-                inputMode="numeric"
-                value={listing.price ?? 0}
-                onFocus={e => e.target.select()}
-                onChange={e => {
-                    if (!/^\d*$/.test(e.target.value)) return;
-                    setListing({ ...listing, price: e.target.value ? Number(e.target.value) : 0 });
-                }}
-            />
+            <input type="number" value={listing.price}
+                   onChange={e => setListing({ ...listing, price: numOrEmpty(e.target.value) })}
+                   placeholder="0" />
 
             <label>Stock</label>
-            <input
-                className="bt-input"
-                style={{ width: "100%", marginBottom: "1rem" }}
-                type="text"
-                inputMode="numeric"
-                value={listing.stock ?? 0}
-                onFocus={e => e.target.select()}
-                onChange={e => {
-                    if (!/^\d*$/.test(e.target.value)) return;
-                    const newStock = e.target.value ? Number(e.target.value) : 0;
-                    setListing({ ...listing, stock: newStock, isOutOfStock: newStock === 0 });
-                }}
-            />
+            <input type="number" value={listing.stock}
+                   onChange={e => setListing({ ...listing, stock: numOrEmpty(e.target.value) })}
+                   placeholder="0" />
 
             <label>Low Stock Threshold</label>
-            <input
-                className="bt-input"
-                style={{ width: "100%", marginBottom: "1rem" }}
-                type="text"
-                inputMode="numeric"
-                value={listing.lowStockThreshold ?? 0}
-                onFocus={e => e.target.select()}
-                onChange={e => {
-                    if (!/^\d*$/.test(e.target.value)) return;
-                    setListing({
-                        ...listing,
-                        lowStockThreshold: e.target.value ? Number(e.target.value) : 0,
-                    });
-                }}
-            />
+            <input type="number" value={listing.lowStockThreshold}
+                   onChange={e => setListing({ ...listing, lowStockThreshold: numOrEmpty(e.target.value) })}
+                   placeholder="0" />
 
             <label>Category</label>
-            <select
-                className="bt-select"
-                style={{ width: "100%", marginBottom: "1rem" }}
-                value={listing.categoryId ?? ""}
-                onChange={e => setListing({ ...listing, categoryId: Number(e.target.value) })}
-            >
-                <option value="">Select a category</option>
+            <select value={listing.categoryId}
+                    onChange={e => setListing({ ...listing, categoryId: Number(e.target.value) })}>
+                <option value={0}>Select category</option>
                 {categories.map(c => (
-                    <option key={c.id} value={c.id}>
-                        {c.name}
-                    </option>
+                    <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
             </select>
 
-            <div style={{ marginBottom: "1.5rem" }}>
-                <label style={{ marginRight: "1.5rem" }}>
-                    <input
-                        type="checkbox"
-                        checked={listing.isActive ?? true}
-                        onChange={e => setListing({ ...listing, isActive: e.target.checked })}
-                    />{" "}
-                    Active
-                </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        checked={listing.isOutOfStock ?? false}
-                        onChange={e => setListing({ ...listing, isOutOfStock: e.target.checked })}
-                    />{" "}
-                    Out of stock
-                </label>
-            </div>
+            <label>
+                <input type="checkbox" checked={listing.isActive}
+                       onChange={e => setListing({ ...listing, isActive: e.target.checked })} />
+                Active
+            </label>
 
-            <button className="bt-btn" onClick={save}>
-                Save
-            </button>
+            <button onClick={save} style={{ marginTop: "1rem" }}>Save</button>
         </div>
     );
 }

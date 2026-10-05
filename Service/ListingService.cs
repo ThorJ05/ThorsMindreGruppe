@@ -35,7 +35,8 @@ public class ListingService : IListingService
             LowStockThreshold = dto.LowStockThreshold,
             IsActive = true,
             IsOutOfStock = dto.Stock == 0,
-            CategoryId = dto.CategoryId
+            CategoryId = dto.CategoryId,
+            ImageUrl = dto.ImageUrl,
         };
 
         listing.Id = await _repo.AddAsync(listing);
@@ -54,6 +55,7 @@ public class ListingService : IListingService
         listing.LowStockThreshold = dto.LowStockThreshold;
         listing.IsOutOfStock = dto.Stock == 0;
         listing.CategoryId = dto.CategoryId;
+        listing.ImageUrl = dto.ImageUrl;
 
         await _repo.UpdateAsync(listing);
         return ToDto(listing);
@@ -100,6 +102,7 @@ public class ListingService : IListingService
             LowStockThreshold = l.LowStockThreshold,
             IsActive = l.IsActive,
             IsOutOfStock = l.IsOutOfStock,
-            CategoryId = l.CategoryId
+            CategoryId = l.CategoryId,
+            ImageUrl = l.ImageUrl,
         };
 }

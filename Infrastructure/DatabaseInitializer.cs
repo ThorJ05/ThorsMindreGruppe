@@ -6,11 +6,8 @@ public static class DatabaseInitializer
 {
     public static void Initialize(AppDb db)
     {
-        // Dev-only: drop and recreate so schema changes always take effect.
-        // Remove this block once you have real data you want to keep.
-        db.DropTable<Category>(throwExceptionIfNotExists: false);
-        db.DropTable<Listing>(throwExceptionIfNotExists: false);
-
+        // Create tables if they don't exist. Never drop them —
+        // doing so would wipe all saved listings and categories on every startup.
         db.CreateTable<Category>(tableOptions: TableOptions.CreateIfNotExists);
         db.CreateTable<Listing>(tableOptions: TableOptions.CreateIfNotExists);
     }

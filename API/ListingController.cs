@@ -46,4 +46,11 @@ public class ListingController : ControllerBase
         var ok = await _service.SetActiveAsync(id, active);
         return ok ? NoContent() : NotFound();
     }
+    
+    [HttpPatch("bulk")]
+    public async Task<IActionResult> BulkUpdate([FromBody] BulkUpdateRequest request)
+    {
+        await _service.BulkUpdateAsync(request.Ids, request.Price, request.Stock);
+        return NoContent();
+    }
 }

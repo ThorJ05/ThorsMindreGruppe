@@ -5,34 +5,13 @@
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
 }
+
 body {
   margin: 0;
-  display: grid;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  position: relative;
 }
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  opacity: 0.05;
-  background: url("./logo.svg");
-  background-size: 256px;
-  transform: rotate(-12deg) scale(1.35);
-  animation: slide 30s linear infinite;
-  pointer-events: none;
-}
-@keyframes slide {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 256px 224px;
-  }
-}
+
 .app {
   max-width: 1280px;
   margin: 0 auto;
@@ -41,6 +20,7 @@ body::before {
   position: relative;
   z-index: 1;
 }
+
 .logo-container {
   display: flex;
   justify-content: center;
@@ -48,6 +28,7 @@ body::before {
   gap: 2rem;
   margin-bottom: 2rem;
 }
+
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -70,23 +51,22 @@ body::before {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 @keyframes spin {
-  from {
-    transform: rotate(0);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0); }
+  to   { transform: rotate(360deg); }
 }
+
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
+
 code {
   background-color: #1a1a1a;
   padding: 0.2em 0.4em;
   border-radius: 0.3em;
   font-family: monospace;
 }
+
 .api-tester {
   margin: 2rem auto 0;
   width: 100%;
@@ -96,6 +76,7 @@ code {
   flex-direction: column;
   gap: 1rem;
 }
+
 .endpoint-row {
   display: flex;
   align-items: center;
@@ -112,6 +93,7 @@ code {
 .endpoint-row:focus-within {
   border-color: #f3d5a3;
 }
+
 .method {
   background: #fbf0df;
   color: #1a1a1a;
@@ -126,9 +108,8 @@ code {
   flex-shrink: 0;
   border: none;
 }
-.method option {
-  text-align: left;
-}
+.method option { text-align: left; }
+
 .url-input {
   width: 100%;
   flex: 1;
@@ -139,12 +120,9 @@ code {
   padding: 0.2rem;
   outline: 0;
 }
-.url-input:focus {
-  color: #fff;
-}
-.url-input::placeholder {
-  color: rgba(251, 240, 223, 0.4);
-}
+.url-input:focus { color: #fff; }
+.url-input::placeholder { color: rgba(251, 240, 223, 0.4); }
+
 .send-button {
   background: #fbf0df;
   color: #1a1a1a;
@@ -153,13 +131,13 @@ code {
   border-radius: 8px;
   font-weight: 700;
   transition: 0.1s;
-  cursor: var(--bun-cursor);
+  cursor: pointer;
 }
 .send-button:hover {
   background: #f3d5a3;
   transform: translateY(-1px);
-  cursor: pointer;
 }
+
 .response-area {
   width: 100%;
   min-height: 120px;
@@ -172,16 +150,278 @@ code {
   resize: vertical;
   box-sizing: border-box;
 }
-.response-area:focus {
-  border-color: #f3d5a3;
-}
-.response-area::placeholder {
-  color: rgba(251, 240, 223, 0.4);
-}
+.response-area:focus { border-color: #f3d5a3; }
+.response-area::placeholder { color: rgba(251, 240, 223, 0.4); }
+
 @media (prefers-reduced-motion) {
   *,
   ::before,
   ::after {
     animation: none !important;
   }
+}
+
+/* ===== Black Templar marketplace theme ===== */
+
+:root {
+  --templar-bg:        #07080a;
+  --templar-panel:     #0d0f12;
+  --templar-panel-2:   #12151a;
+  --templar-border:    #2a2f38;
+  --templar-red:       #8b1a1a;
+  --templar-red-lit:   #c62b2b;
+  --templar-bone:      #e8d9b0;
+  --templar-bone-dim:  #8a7a52;
+  --templar-brass:     #c9a227;
+  --templar-green:     #39ff14;
+}
+
+body.templar {
+  background: var(--templar-bg);
+  color: var(--templar-bone);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+body.templar::before {
+  content: "";
+  position: fixed; inset: 0; z-index: -2;
+  background:
+          radial-gradient(ellipse at center, #101216 0%, #07080a 70%),
+          repeating-linear-gradient(45deg, transparent 0 22px, rgba(198,43,43,.025) 22px 23px),
+          repeating-linear-gradient(-45deg, transparent 0 22px, rgba(198,43,43,.025) 22px 23px);
+  pointer-events: none;
+}
+
+body.templar::after {
+  content: "";
+  position: fixed; inset: 0; z-index: -1;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,0) 0 2px, rgba(0,0,0,.35) 2px 3px);
+  opacity: .35;
+  mix-blend-mode: multiply;
+}
+
+.templar-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+.templar-topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--templar-border);
+  background: linear-gradient(180deg, #0d0f12, #07080a);
+}
+
+.templar-search {
+  flex: 1;
+  max-width: 520px;
+  position: relative;
+}
+.templar-search input {
+  width: 100%;
+  background: #0a0c0f;
+  border: 1px solid var(--templar-border);
+  color: var(--templar-bone);
+  padding: .65rem 2.25rem .65rem .9rem;
+  border-radius: 2px;
+  font-family: inherit;
+}
+.templar-search input::placeholder { color: #5a6270; }
+.templar-search input:focus {
+  outline: none;
+  border-color: var(--templar-red);
+  box-shadow: 0 0 12px rgba(198,43,43,.25);
+}
+.templar-search .icon {
+  position: absolute;
+  right: .75rem; top: 50%; transform: translateY(-50%);
+  color: #5a6270;
+}
+
+.templar-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--templar-red);
+  background: rgba(139,26,26,.12);
+  color: var(--templar-red-lit);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: "Cinzel", serif;
+  font-weight: 900;
+}
+.templar-badge:hover {
+  background: rgba(198,43,43,.2);
+  box-shadow: 0 0 14px rgba(198,43,43,.4);
+}
+
+.templar-sidebar {
+  border-right: 1px solid var(--templar-border);
+  background: linear-gradient(180deg, #0a0c0f, #07080a);
+  padding: 1.5rem 1.25rem;
+}
+.templar-sidebar h2 {
+  font-family: "Cinzel", serif;
+  color: var(--templar-bone);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  font-size: .8rem;
+  margin: 0 0 1rem;
+  padding-bottom: .5rem;
+  border-bottom: 1px solid var(--templar-border);
+}
+.templar-cat {
+  display: block;
+  color: var(--templar-bone-dim);
+  padding: .5rem 0;
+  font-size: .85rem;
+  letter-spacing: .08em;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all .15s;
+}
+.templar-cat:hover {
+  color: var(--templar-bone);
+  border-bottom-color: var(--templar-red);
+  text-shadow: 0 0 6px rgba(198,43,43,.4);
+}
+.templar-cat::before {
+  content: "☩ ";
+  color: var(--templar-red-lit);
+  margin-right: .35rem;
+  opacity: .6;
+}
+
+.templar-main {
+  padding: 1.75rem 2rem;
+  overflow-y: auto;
+}
+.templar-main h2 {
+  font-family: "Cinzel", serif;
+  font-size: 1rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--templar-bone);
+  margin: 0 0 1rem;
+  text-shadow: 0 0 8px rgba(198,43,43,.2);
+}
+.templar-main h2::after {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 2px;
+  background: var(--templar-red);
+  margin-top: .4rem;
+}
+
+.templar-vendors {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.templar-products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.templar-card {
+  background: linear-gradient(180deg, var(--templar-panel), var(--templar-panel-2));
+  border: 1px solid var(--templar-border);
+  border-radius: 2px;
+  padding: 1rem;
+  color: var(--templar-bone);
+  position: relative;
+  transition: border-color .15s, box-shadow .15s;
+}
+.templar-card:hover {
+  border-color: var(--templar-red);
+  box-shadow: 0 0 18px rgba(198,43,43,.2);
+}
+.templar-card .thumb {
+  aspect-ratio: 1 / 1;
+  background: repeating-linear-gradient(45deg, #0d0f12 0 8px, #101216 8px 16px);
+  border: 1px solid var(--templar-border);
+  margin-bottom: .75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3a3f4a;
+  font-family: "Cinzel", serif;
+  font-size: .75rem;
+  letter-spacing: .18em;
+}
+.templar-card h3 {
+  font-family: "Cinzel", serif;
+  font-size: .95rem;
+  letter-spacing: .06em;
+  color: var(--templar-bone);
+  margin: 0 0 .25rem;
+}
+.templar-card .vendor {
+  color: var(--templar-bone-dim);
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin: 0 0 .5rem;
+}
+.templar-card .price {
+  color: var(--templar-brass);
+  font-family: "Cinzel", serif;
+  font-size: 1.05rem;
+  letter-spacing: .05em;
+}
+
+.templar-vendor {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .75rem;
+}
+.templar-vendor .sigil {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--templar-red-lit), var(--templar-red) 70%);
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.7);
+  display: flex; align-items: center; justify-content: center;
+  color: #2a0a0a;
+  font-family: "Cinzel", serif;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+.templar-vendor .name {
+  font-family: "Cinzel", serif;
+  font-size: .85rem;
+  letter-spacing: .08em;
+  color: var(--templar-bone);
+}
+.templar-vendor .meta {
+  font-size: .7rem;
+  color: var(--templar-bone-dim);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.templar-featured {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  background: rgba(198,43,43,.15);
+  color: var(--templar-red-lit);
+  border: 1px solid var(--templar-red);
+  padding: .1rem .4rem;
+  font-size: .65rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  border-radius: 2px;
 }
