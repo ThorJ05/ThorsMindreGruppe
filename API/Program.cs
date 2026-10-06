@@ -4,6 +4,7 @@ using LinqToDB.AspNet;
 using Service;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddOpenApiDocument();
 builder.Services.AddControllers();
 
@@ -17,19 +18,37 @@ builder.Services.AddLinqToDBContext<AppDb>((provider, options) =>
         builder.Configuration.GetConnectionString("Default")!
     ));
 
-builder.Services.AddCors(o => o.AddDefaultPolicy(p =>
-    p.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod()));
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
+
+app.UseCors();
+
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDb>();
     DatabaseInitializer.Initialize(db);
 }
 
-app.UseCors();
 app.MapControllers();
 app.UseOpenApi();
 app.UseSwaggerUi();
+
+// Friendly startup banner so it's obvious where to open the app.
+Console.WriteLine();
+Console.WriteLine("  ------------------------------------------------------------");
+Console.WriteLine("   API is running.");
+Console.WriteLine("   Open the app at  ->  http://localhost:8080");
+Console.WriteLine("   Swagger UI      ->  http://localhost:8080/swagger");
+Console.WriteLine("  ------------------------------------------------------------");
+Console.WriteLine();
 
 app.Run();
