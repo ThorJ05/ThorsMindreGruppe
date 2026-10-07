@@ -1,10 +1,51 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api-instance";
-import { useCart } from "../CartContext";
+import { useCart, type CartLine } from "../CartContext";
+
+function QuantityInput({ line }: { line: CartLine }) {
+    const { setQuantity, removeFromCart } = useCart();
+    // Local text so the field can be freely cleared while typing,
+    // without the cart removing the line on every keystroke.
+    const [text, setText] = useState(String(line.quantity));
+
+    function commit() {
+        const n = Number(text);
+        if (text.trim() === "" || Number.isNaN(n) || n <= 0) {
+            removeFromCart(line.listing.id!);
+            return;
+        }
+        const max = line.listing.stock ?? n;
+        const clamped = Math.min(n, max);
+        setQuantity(line.listing.id!, clamped);
+        setText(String(clamped));
+    }
+
+    return (
+        <input
+            type="number"
+            min={0}
+            max={line.listing.stock}
+            value={text}
+            onChange={e => setText(e.target.value)}
+            onBlur={commit}
+            onKeyDown={e => {
+                if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+            }}
+            style={{
+                width: "4rem",
+                background: "#0d0f12",
+                border: "1px solid #2a2f38",
+                color: "#e8d9b0",
+                padding: ".3rem .5rem",
+                textAlign: "center",
+            }}
+        />
+    );
+}
 
 export default function CartPage() {
-    const { lines, removeFromCart, setQuantity, clearCart, total } = useCart();
+    const { lines, removeFromCart, clearCart, total } = useCart();
     const [error, setError] = useState<string | null>(null);
     const [checkingOut, setCheckingOut] = useState(false);
     const navigate = useNavigate();
@@ -13,7 +54,7 @@ export default function CartPage() {
         setError(null);
         setCheckingOut(true);
         try {
-            const res = await api.api.orderCheckout({
+            await api.api.orderCheckout({
                 items: lines.map(l => ({
                     listingId: l.listing.id!,
                     quantity: l.quantity,
@@ -61,16 +102,7 @@ export default function CartPage() {
                             </div>
                         </div>
 
-                        <input
-                            type="number"
-                            min={1}
-                            max={line.listing.stock}
-                            value={line.quantity}
-                            onChange={e =>
-                                setQuantity(line.listing.id!, Number(e.target.value))
-                            }
-                            style={{ width: "4rem" }}
-                        />
+                        <QuantityInput line={line} />
 
                         <div style={{ width: "6rem", textAlign: "right" }}>
                             {(line.listing.price ?? 0) * line.quantity} THRONES
