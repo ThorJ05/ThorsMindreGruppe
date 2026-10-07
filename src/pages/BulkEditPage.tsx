@@ -1,5 +1,6 @@
 ﻿import { useEffect, useState } from "react";
-import { api, type ListingDto } from "../Api";
+import { api } from "../api-instance";
+import type { ListingDto } from "../Api";
 
 export default function BulkEditPage() {
     const [listings, setListings] = useState<ListingDto[]>([]);

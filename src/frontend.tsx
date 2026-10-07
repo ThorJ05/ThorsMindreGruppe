@@ -9,6 +9,10 @@ import ListingEditor from "./pages/ListingEditor";
 import BulkEditPage from "./pages/BulkEditPage";
 import CategoryPage from "./pages/CategoryPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import CartPage from "./pages/CartPage";
+import OrderHistoryPage from "./pages/OrderHistoryPage";
+
+import { CartProvider } from "./CartContext";
 
 function AppLayout() {
     // Turn on the Black Templar theme for the whole app.
@@ -36,15 +40,19 @@ function AppLayout() {
                     fontSize: ".8rem",
                 }}
             >
-                <Link to="/"          style={{ color: "#e8d9b0" }}>Listings</Link>
-                <Link to="/editor"    style={{ color: "#e8d9b0" }}>Create Listing</Link>
-                <Link to="/bulk"      style={{ color: "#e8d9b0" }}>Bulk Edit</Link>
+                <Link to="/"           style={{ color: "#e8d9b0" }}>Listings</Link>
+                <Link to="/cart"       style={{ color: "#e8d9b0" }}>Cart</Link>
+                <Link to="/orders"     style={{ color: "#e8d9b0" }}>Orders</Link>
+                <Link to="/editor"     style={{ color: "#e8d9b0" }}>Create Listing</Link>
+                <Link to="/bulk"       style={{ color: "#e8d9b0" }}>Bulk Edit</Link>
                 <Link to="/categories" style={{ color: "#e8d9b0" }}>Categories</Link>
-                <Link to="/admin"     style={{ color: "#e8d9b0" }}>Dashboard</Link>
+                <Link to="/admin"      style={{ color: "#e8d9b0" }}>Dashboard</Link>
             </nav>
 
             <Routes>
                 <Route path="/"           element={<ListingPage />} />
+                <Route path="/cart"       element={<CartPage />} />
+                <Route path="/orders"     element={<OrderHistoryPage />} />
                 <Route path="/editor"     element={<ListingEditor />} />
                 <Route path="/editor/:id" element={<ListingEditor />} />
                 <Route path="/bulk"       element={<BulkEditPage />} />
@@ -57,6 +65,8 @@ function AppLayout() {
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
-        <AppLayout />
+        <CartProvider>
+            <AppLayout />
+        </CartProvider>
     </BrowserRouter>
 );

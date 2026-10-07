@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { api, type CategoryDto, type ListingDto } from "../Api";
+import { api } from "../api-instance";
+import type { CategoryDto, ListingDto } from "../Api";
 
 type FormState = {
     title: string;

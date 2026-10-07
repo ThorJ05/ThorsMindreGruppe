@@ -10,5 +10,7 @@ public static class DatabaseInitializer
         // doing so would wipe all saved listings and categories on every startup.
         db.CreateTable<Category>(tableOptions: TableOptions.CreateIfNotExists);
         db.CreateTable<Listing>(tableOptions: TableOptions.CreateIfNotExists);
+        db.CreateTable<Order>(tableOptions: TableOptions.CreateIfNotExists);
+        db.CreateTable<OrderItem>(tableOptions: TableOptions.CreateIfNotExists);
     }
 }

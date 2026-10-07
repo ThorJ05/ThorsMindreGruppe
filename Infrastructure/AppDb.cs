@@ -10,4 +10,6 @@ public class AppDb : DataConnection
     // Gives us access to the Category table
     public ITable<Category> Categories => this.GetTable<Category>();
     public ITable<Listing> Listings => this.GetTable<Listing>();
+    public ITable<Order> Orders => this.GetTable<Order>();
+    public ITable<OrderItem> OrderItems => this.GetTable<OrderItem>();
 }
