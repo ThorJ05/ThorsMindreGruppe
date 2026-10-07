@@ -1,403 +1,624 @@
 /* eslint-disable */
 /* tslint:disable */
 // @ts-nocheck
+/*
+ * ---------------------------------------------------------------
+ * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
+ * ##                                                           ##
+ * ## AUTHOR: acacode                                           ##
+ * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
+ * ---------------------------------------------------------------
+ */
 
 export interface CategoryDto {
-    id?: number;
-    name?: string;
-    parentCategoryId?: number | null;
-    isActive?: boolean;
-    sortOrder?: number;
-    isRestricted?: boolean;
-    minSoldOrders?: number | null;
+  /** @format int32 */
+  id?: number;
+  name?: string;
+  /** @format int32 */
+  parentCategoryId?: number | null;
+  isActive?: boolean;
+  /** @format int32 */
+  sortOrder?: number;
+  isRestricted?: boolean;
+  /** @format int32 */
+  minSoldOrders?: number | null;
 }
 
 export interface ListingDto {
-    id?: number;
-    title?: string;
-    description?: string | null;
-    price?: number;
-    stock?: number;
-    lowStockThreshold?: number | null;
-    isActive?: boolean;
-    isOutOfStock?: boolean;
-    categoryId?: number;
-    imageUrl?: string | null;
+  /** @format int32 */
+  id?: number;
+  title?: string;
+  description?: string | null;
+  /** @format decimal */
+  price?: number;
+  /** @format int32 */
+  stock?: number;
+  /** @format int32 */
+  lowStockThreshold?: number | null;
+  isActive?: boolean;
+  isOutOfStock?: boolean;
+  /** @format int32 */
+  categoryId?: number;
+  imageUrl?: string | null;
 }
 
 export interface BulkUpdateRequest {
-    ids?: number[];
-    price?: number | null;
-    stock?: number | null;
+  ids?: number[];
+  /** @format decimal */
+  price?: number | null;
+  /** @format int32 */
+  stock?: number | null;
+}
+
+export interface OrderDto {
+  /** @format int32 */
+  id?: number;
+  status?: string;
+  /** @format date-time */
+  createdAt?: string;
+  /** @format decimal */
+  total?: number;
+  items?: OrderItemDto[];
+}
+
+export interface OrderItemDto {
+  /** @format int32 */
+  id?: number;
+  /** @format int32 */
+  listingId?: number;
+  listingTitle?: string;
+  /** @format int32 */
+  quantity?: number;
+  /** @format decimal */
+  unitPrice?: number;
+}
+
+export interface CheckoutRequest {
+  items?: CheckoutItemRequest[];
+}
+
+export interface CheckoutItemRequest {
+  /** @format int32 */
+  listingId?: number;
+  /** @format int32 */
+  quantity?: number;
 }
 
 export type QueryParamsType = Record<string | number, any>;
 export type ResponseFormat = keyof Omit<Body, "body" | "bodyUsed">;
 
 export interface FullRequestParams extends Omit<RequestInit, "body"> {
-    secure?: boolean;
-    path: string;
-    type?: ContentType;
-    query?: QueryParamsType;
-    format?: ResponseFormat;
-    body?: unknown;
-    baseUrl?: string;
-    cancelToken?: CancelToken;
+  /** set parameter to `true` for call `securityWorker` for this request */
+  secure?: boolean;
+  /** request path */
+  path: string;
+  /** content type of request body */
+  type?: ContentType;
+  /** query params */
+  query?: QueryParamsType;
+  /** format of response (i.e. response.json() -> format: "json") */
+  format?: ResponseFormat;
+  /** request body */
+  body?: unknown;
+  /** base url */
+  baseUrl?: string;
+  /** request cancellation token */
+  cancelToken?: CancelToken;
 }
 
 export type RequestParams = Omit<
-    FullRequestParams,
-    "body" | "method" | "query" | "path"
+  FullRequestParams,
+  "body" | "method" | "query" | "path"
 >;
 
 export interface ApiConfig<SecurityDataType = unknown> {
-    baseUrl?: string;
-    baseApiParams?: Omit<RequestParams, "baseUrl" | "cancelToken" | "signal">;
-    securityWorker?: (
-        securityData: SecurityDataType | null,
-    ) => Promise<RequestParams | void> | RequestParams | void;
-    customFetch?: typeof fetch;
+  baseUrl?: string;
+  baseApiParams?: Omit<RequestParams, "baseUrl" | "cancelToken" | "signal">;
+  securityWorker?: (
+    securityData: SecurityDataType | null,
+  ) => Promise<RequestParams | void> | RequestParams | void;
+  customFetch?: typeof fetch;
 }
 
 export interface HttpResponse<D extends unknown, E extends unknown = unknown>
-    extends Response {
-    data: D;
-    error: E;
+  extends Response {
+  data: D;
+  error: E;
 }
 
 type CancelToken = Symbol | string | number;
 
 export enum ContentType {
-    Json = "application/json",
-    JsonApi = "application/vnd.api+json",
-    FormData = "multipart/form-data",
-    UrlEncoded = "application/x-www-form-urlencoded",
-    Text = "text/plain",
+  Json = "application/json",
+  JsonApi = "application/vnd.api+json",
+  FormData = "multipart/form-data",
+  UrlEncoded = "application/x-www-form-urlencoded",
+  Text = "text/plain",
 }
 
 export class HttpClient<SecurityDataType = unknown> {
     public baseUrl: string = "";
-    private securityData: SecurityDataType | null = null;
-    private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
-    private abortControllers = new Map<CancelToken, AbortController>();
-    private customFetch = (...fetchParams: Parameters<typeof fetch>) =>
-        fetch(...fetchParams);
+  private securityData: SecurityDataType | null = null;
+  private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
+  private abortControllers = new Map<CancelToken, AbortController>();
+  private customFetch = (...fetchParams: Parameters<typeof fetch>) =>
+    fetch(...fetchParams);
 
-    private baseApiParams: RequestParams = {
-        credentials: "same-origin",
-        headers: {},
-        redirect: "follow",
-        referrerPolicy: "no-referrer",
-    };
+  private baseApiParams: RequestParams = {
+    credentials: "same-origin",
+    headers: {},
+    redirect: "follow",
+    referrerPolicy: "no-referrer",
+  };
 
-    constructor(apiConfig: ApiConfig<SecurityDataType> = {}) {
-        Object.assign(this, apiConfig);
-    }
+  constructor(apiConfig: ApiConfig<SecurityDataType> = {}) {
+    Object.assign(this, apiConfig);
+  }
 
-    public setSecurityData = (data: SecurityDataType | null) => {
-        this.securityData = data;
-    };
+  public setSecurityData = (data: SecurityDataType | null) => {
+    this.securityData = data;
+  };
 
-    protected encodeQueryParam(key: string, value: any) {
-        const encodedKey = encodeURIComponent(key);
-        return `${encodedKey}=${encodeURIComponent(typeof value === "number" ? value : `${value}`)}`;
-    }
+  protected encodeQueryParam(key: string, value: any) {
+    const encodedKey = encodeURIComponent(key);
+    return `${encodedKey}=${encodeURIComponent(typeof value === "number" ? value : `${value}`)}`;
+  }
 
-    protected addQueryParam(query: QueryParamsType, key: string) {
-        return this.encodeQueryParam(key, query[key]);
-    }
+  protected addQueryParam(query: QueryParamsType, key: string) {
+    return this.encodeQueryParam(key, query[key]);
+  }
 
-    protected addArrayQueryParam(query: QueryParamsType, key: string) {
-        const value = query[key];
-        return value.map((v: any) => this.encodeQueryParam(key, v)).join("&");
-    }
+  protected addArrayQueryParam(query: QueryParamsType, key: string) {
+    const value = query[key];
+    return value.map((v: any) => this.encodeQueryParam(key, v)).join("&");
+  }
 
-    protected toQueryString(rawQuery?: QueryParamsType): string {
-        const query = rawQuery || {};
-        const keys = Object.keys(query).filter(
-            (key) => "undefined" !== typeof query[key],
+  protected toQueryString(rawQuery?: QueryParamsType): string {
+    const query = rawQuery || {};
+    const keys = Object.keys(query).filter(
+      (key) => "undefined" !== typeof query[key],
+    );
+    return keys
+      .map((key) =>
+        Array.isArray(query[key])
+          ? this.addArrayQueryParam(query, key)
+          : this.addQueryParam(query, key),
+      )
+      .join("&");
+  }
+
+  protected addQueryParams(rawQuery?: QueryParamsType): string {
+    const queryString = this.toQueryString(rawQuery);
+    return queryString ? `?${queryString}` : "";
+  }
+
+  private contentFormatters: Record<ContentType, (input: any) => any> = {
+    [ContentType.Json]: (input: any) =>
+      input !== null && (typeof input === "object" || typeof input === "string")
+        ? JSON.stringify(input)
+        : input,
+    [ContentType.JsonApi]: (input: any) =>
+      input !== null && (typeof input === "object" || typeof input === "string")
+        ? JSON.stringify(input)
+        : input,
+    [ContentType.Text]: (input: any) =>
+      input !== null && typeof input !== "string"
+        ? JSON.stringify(input)
+        : input,
+    [ContentType.FormData]: (input: any) => {
+      if (input instanceof FormData) {
+        return input;
+      }
+
+      return Object.keys(input || {}).reduce((formData, key) => {
+        const property = input[key];
+        formData.append(
+          key,
+          property instanceof Blob
+            ? property
+            : typeof property === "object" && property !== null
+              ? JSON.stringify(property)
+              : `${property}`,
         );
-        return keys
-            .map((key) =>
-                Array.isArray(query[key])
-                    ? this.addArrayQueryParam(query, key)
-                    : this.addQueryParam(query, key),
-            )
-            .join("&");
-    }
+        return formData;
+      }, new FormData());
+    },
+    [ContentType.UrlEncoded]: (input: any) => this.toQueryString(input),
+  };
 
-    protected addQueryParams(rawQuery?: QueryParamsType): string {
-        const queryString = this.toQueryString(rawQuery);
-        return queryString ? `?${queryString}` : "";
-    }
-
-    private contentFormatters: Record<ContentType, (input: any) => any> = {
-        [ContentType.Json]: (input: any) =>
-            input !== null && (typeof input === "object" || typeof input === "string")
-                ? JSON.stringify(input)
-                : input,
-        [ContentType.JsonApi]: (input: any) =>
-            input !== null && (typeof input === "object" || typeof input === "string")
-                ? JSON.stringify(input)
-                : input,
-        [ContentType.Text]: (input: any) =>
-            input !== null && typeof input !== "string"
-                ? JSON.stringify(input)
-                : input,
-        [ContentType.FormData]: (input: any) => {
-            if (input instanceof FormData) {
-                return input;
-            }
-            return Object.keys(input || {}).reduce((formData, key) => {
-                const property = input[key];
-                formData.append(
-                    key,
-                    property instanceof Blob
-                        ? property
-                        : typeof property === "object" && property !== null
-                            ? JSON.stringify(property)
-                            : `${property}`,
-                );
-                return formData;
-            }, new FormData());
-        },
-        [ContentType.UrlEncoded]: (input: any) => this.toQueryString(input),
+  protected mergeRequestParams(
+    params1: RequestParams,
+    params2?: RequestParams,
+  ): RequestParams {
+    return {
+      ...this.baseApiParams,
+      ...params1,
+      ...(params2 || {}),
+      headers: {
+        ...(this.baseApiParams.headers || {}),
+        ...(params1.headers || {}),
+        ...((params2 && params2.headers) || {}),
+      },
     };
+  }
 
-    protected mergeRequestParams(
-        params1: RequestParams,
-        params2?: RequestParams,
-    ): RequestParams {
-        return {
-            ...this.baseApiParams,
-            ...params1,
-            ...(params2 || {}),
-            headers: {
-                ...(this.baseApiParams.headers || {}),
-                ...(params1.headers || {}),
-                ...((params2 && params2.headers) || {}),
-            },
-        };
-    }
-
-    protected createAbortSignal = (
-        cancelToken: CancelToken,
-    ): AbortSignal | undefined => {
-        if (this.abortControllers.has(cancelToken)) {
-            const abortController = this.abortControllers.get(cancelToken);
-            if (abortController) {
-                return abortController.signal;
-            }
-            return void 0;
-        }
-        const abortController = new AbortController();
-        this.abortControllers.set(cancelToken, abortController);
+  protected createAbortSignal = (
+    cancelToken: CancelToken,
+  ): AbortSignal | undefined => {
+    if (this.abortControllers.has(cancelToken)) {
+      const abortController = this.abortControllers.get(cancelToken);
+      if (abortController) {
         return abortController.signal;
-    };
+      }
+      return void 0;
+    }
 
-    public abortRequest = (cancelToken: CancelToken) => {
-        const abortController = this.abortControllers.get(cancelToken);
-        if (abortController) {
-            abortController.abort();
-            this.abortControllers.delete(cancelToken);
-        }
-    };
+    const abortController = new AbortController();
+    this.abortControllers.set(cancelToken, abortController);
+    return abortController.signal;
+  };
 
-    public request = async <T = any, E = any>({
-                                                  body,
-                                                  secure,
-                                                  path,
-                                                  type,
-                                                  query,
-                                                  format,
-                                                  baseUrl,
-                                                  cancelToken,
-                                                  ...params
-                                              }: FullRequestParams): Promise<HttpResponse<T, E>> => {
-        const secureParams =
-            ((typeof secure === "boolean" ? secure : this.baseApiParams.secure) &&
-                this.securityWorker &&
-                (await this.securityWorker(this.securityData))) ||
-            {};
-        const requestParams = this.mergeRequestParams(params, secureParams);
-        const queryString = query && this.toQueryString(query);
-        const payloadFormatter = this.contentFormatters[type || ContentType.Json];
-        const responseFormat = format || requestParams.format;
+  public abortRequest = (cancelToken: CancelToken) => {
+    const abortController = this.abortControllers.get(cancelToken);
 
-        return this.customFetch(
-            `${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`,
-            {
-                ...requestParams,
-                headers: {
-                    ...(requestParams.headers || {}),
-                    ...(type && type !== ContentType.FormData
-                        ? { "Content-Type": type }
-                        : {}),
-                },
-                signal:
-                    (cancelToken
-                        ? this.createAbortSignal(cancelToken)
-                        : requestParams.signal) || null,
-                body:
-                    typeof body === "undefined" || body === null
-                        ? null
-                        : payloadFormatter(body),
-            },
-        ).then(async (response) => {
-            const r = response as HttpResponse<T, E>;
-            r.data = null as unknown as T;
-            r.error = null as unknown as E;
+    if (abortController) {
+      abortController.abort();
+      this.abortControllers.delete(cancelToken);
+    }
+  };
 
-            const responseToParse = responseFormat ? response.clone() : response;
-            const data = !responseFormat
-                ? r
-                : await responseToParse[responseFormat]()
-                    .then((data) => {
-                        if (r.ok) {
-                            r.data = data;
-                        } else {
-                            r.error = data;
-                        }
-                        return r;
-                    })
-                    .catch((e) => {
-                        r.error = e;
-                        return r;
-                    });
+  public request = async <T = any, E = any>({
+    body,
+    secure,
+    path,
+    type,
+    query,
+    format,
+    baseUrl,
+    cancelToken,
+    ...params
+  }: FullRequestParams): Promise<HttpResponse<T, E>> => {
+    const secureParams =
+      ((typeof secure === "boolean" ? secure : this.baseApiParams.secure) &&
+        this.securityWorker &&
+        (await this.securityWorker(this.securityData))) ||
+      {};
+    const requestParams = this.mergeRequestParams(params, secureParams);
+    const queryString = query && this.toQueryString(query);
+    const payloadFormatter = this.contentFormatters[type || ContentType.Json];
+    const responseFormat = format || requestParams.format;
 
-            if (cancelToken) {
-                this.abortControllers.delete(cancelToken);
-            }
-            if (!response.ok) throw data;
-            return data;
-        });
-    };
+    return this.customFetch(
+      `${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`,
+      {
+        ...requestParams,
+        headers: {
+          ...(requestParams.headers || {}),
+          ...(type && type !== ContentType.FormData
+            ? { "Content-Type": type }
+            : {}),
+        },
+        signal:
+          (cancelToken
+            ? this.createAbortSignal(cancelToken)
+            : requestParams.signal) || null,
+        body:
+          typeof body === "undefined" || body === null
+            ? null
+            : payloadFormatter(body),
+      },
+    ).then(async (response) => {
+      const r = response as HttpResponse<T, E>;
+      r.data = null as unknown as T;
+      r.error = null as unknown as E;
+
+      const responseToParse = responseFormat ? response.clone() : response;
+      const data = !responseFormat
+        ? r
+        : await responseToParse[responseFormat]()
+            .then((data) => {
+              if (r.ok) {
+                r.data = data;
+              } else {
+                r.error = data;
+              }
+              return r;
+            })
+            .catch((e) => {
+              r.error = e;
+              return r;
+            });
+
+      if (cancelToken) {
+        this.abortControllers.delete(cancelToken);
+      }
+
+      if (!response.ok) throw data;
+      return data;
+    });
+  };
 }
 
+/**
+ * @title My Title
+ * @version 1.0.0
+ * @baseUrl http://localhost:5123
+ */
 export class Api<
-    SecurityDataType extends unknown,
+  SecurityDataType extends unknown,
 > extends HttpClient<SecurityDataType> {
-    api = {
-        categoryGetAll: (params: RequestParams = {}) =>
-            this.request<CategoryDto[], any>({
-                path: `/api/category`,
-                method: "GET",
-                format: "json",
-                ...params,
-            }),
+  api = {
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryGetAll
+     * @request GET:/api/category
+     */
+    categoryGetAll: (params: RequestParams = {}) =>
+      this.request<CategoryDto[], any>({
+        path: `/api/category`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
 
-        categoryCreate: (data: CategoryDto, params: RequestParams = {}) =>
-            this.request<CategoryDto, any>({
-                path: `/api/category`,
-                method: "POST",
-                body: data,
-                type: ContentType.Json,
-                format: "json",
-                ...params,
-            }),
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryCreate
+     * @request POST:/api/category
+     */
+    categoryCreate: (data: CategoryDto, params: RequestParams = {}) =>
+      this.request<CategoryDto, any>({
+        path: `/api/category`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
 
-        categoryGetById: (id: number, params: RequestParams = {}) =>
-            this.request<CategoryDto, any>({
-                path: `/api/category/${id}`,
-                method: "GET",
-                format: "json",
-                ...params,
-            }),
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryGetById
+     * @request GET:/api/category/{id}
+     */
+    categoryGetById: (id: number, params: RequestParams = {}) =>
+      this.request<CategoryDto, any>({
+        path: `/api/category/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
 
-        categoryUpdate: (id: number, data: CategoryDto, params: RequestParams = {}) =>
-            this.request<CategoryDto, any>({
-                path: `/api/category/${id}`,
-                method: "PUT",
-                body: data,
-                type: ContentType.Json,
-                format: "json",
-                ...params,
-            }),
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryUpdate
+     * @request PUT:/api/category/{id}
+     */
+    categoryUpdate: (
+      id: number,
+      data: CategoryDto,
+      params: RequestParams = {},
+    ) =>
+      this.request<CategoryDto, any>({
+        path: `/api/category/${id}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
 
-        categoryDelete: (
-            id: number,
-            query?: { moveListingsToCategoryId?: number },
-            params: RequestParams = {},
-        ) =>
-            this.request<void, any>({
-                path: `/api/category/${id}`,
-                method: "DELETE",
-                query: query,
-                ...params,
-            }),
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategoryDelete
+     * @request DELETE:/api/category/{id}
+     */
+    categoryDelete: (
+      id: number,
+      query?: {
+        /** @format int32 */
+        moveListingsToCategoryId?: number | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<Blob, any>({
+        path: `/api/category/${id}`,
+        method: "DELETE",
+        query: query,
+        ...params,
+      }),
 
-        categorySetActive: (id: number, data: boolean, params: RequestParams = {}) =>
-            this.request<void, any>({
-                path: `/api/category/${id}/active`,
-                method: "PATCH",
-                body: data,
-                type: ContentType.Json,
-                ...params,
-            }),
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategorySetActive
+     * @request PATCH:/api/category/{id}/active
+     */
+    categorySetActive: (
+      id: number,
+      data: boolean,
+      params: RequestParams = {},
+    ) =>
+      this.request<Blob, any>({
+        path: `/api/category/${id}/active`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
 
-        categorySetRestricted: (id: number, data: boolean, params: RequestParams = {}) =>
-            this.request<void, any>({
-                path: `/api/category/${id}/restricted`,
-                method: "PATCH",
-                body: data,
-                type: ContentType.Json,
-                ...params,
-            }),
+    /**
+     * No description
+     *
+     * @tags Category
+     * @name CategorySetRestricted
+     * @request PATCH:/api/category/{id}/restricted
+     */
+    categorySetRestricted: (
+      id: number,
+      data: boolean,
+      params: RequestParams = {},
+    ) =>
+      this.request<Blob, any>({
+        path: `/api/category/${id}/restricted`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
 
-        listingGetAll: (params: RequestParams = {}) =>
-            this.request<ListingDto[], any>({
-                path: `/api/listing`,
-                method: "GET",
-                format: "json",
-                ...params,
-            }),
+    /**
+     * No description
+     *
+     * @tags Listing
+     * @name ListingGetAll
+     * @request GET:/api/listing
+     */
+    listingGetAll: (params: RequestParams = {}) =>
+      this.request<ListingDto[], any>({
+        path: `/api/listing`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
 
-        listingCreate: (data: ListingDto, params: RequestParams = {}) =>
-            this.request<ListingDto, any>({
-                path: `/api/listing`,
-                method: "POST",
-                body: data,
-                type: ContentType.Json,
-                format: "json",
-                ...params,
-            }),
+    /**
+     * No description
+     *
+     * @tags Listing
+     * @name ListingCreate
+     * @request POST:/api/listing
+     */
+    listingCreate: (data: ListingDto, params: RequestParams = {}) =>
+      this.request<ListingDto, any>({
+        path: `/api/listing`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
 
-        listingGetById: (id: number, params: RequestParams = {}) =>
-            this.request<ListingDto, any>({
-                path: `/api/listing/${id}`,
-                method: "GET",
-                format: "json",
-                ...params,
-            }),
+    /**
+     * No description
+     *
+     * @tags Listing
+     * @name ListingGetById
+     * @request GET:/api/listing/{id}
+     */
+    listingGetById: (id: number, params: RequestParams = {}) =>
+      this.request<ListingDto, any>({
+        path: `/api/listing/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
 
-        listingUpdate: (id: number, data: ListingDto, params: RequestParams = {}) =>
-            this.request<ListingDto, any>({
-                path: `/api/listing/${id}`,
-                method: "PUT",
-                body: data,
-                type: ContentType.Json,
-                format: "json",
-                ...params,
-            }),
+    /**
+     * No description
+     *
+     * @tags Listing
+     * @name ListingUpdate
+     * @request PUT:/api/listing/{id}
+     */
+    listingUpdate: (id: number, data: ListingDto, params: RequestParams = {}) =>
+      this.request<ListingDto, any>({
+        path: `/api/listing/${id}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
 
-        listingSetActive: (id: number, data: boolean, params: RequestParams = {}) =>
-            this.request<void, any>({
-                path: `/api/listing/${id}/active`,
-                method: "PATCH",
-                body: data,
-                type: ContentType.Json,
-                ...params,
-            }),
+    /**
+     * No description
+     *
+     * @tags Listing
+     * @name ListingSetActive
+     * @request PATCH:/api/listing/{id}/active
+     */
+    listingSetActive: (id: number, data: boolean, params: RequestParams = {}) =>
+      this.request<Blob, any>({
+        path: `/api/listing/${id}/active`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
 
-        listingBulkUpdate: (data: BulkUpdateRequest, params: RequestParams = {}) =>
-            this.request<void, any>({
-                path: `/api/listing/bulk`,
-                method: "PATCH",
-                body: data,
-                type: ContentType.Json,
-                ...params,
-            }),
-    };
+    /**
+     * No description
+     *
+     * @tags Listing
+     * @name ListingBulkUpdate
+     * @request PATCH:/api/listing/bulk
+     */
+    listingBulkUpdate: (data: BulkUpdateRequest, params: RequestParams = {}) =>
+      this.request<Blob, any>({
+        path: `/api/listing/bulk`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Order
+     * @name OrderGetAll
+     * @request GET:/api/order
+     */
+    orderGetAll: (params: RequestParams = {}) =>
+      this.request<OrderDto[], any>({
+        path: `/api/order`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Order
+     * @name OrderCheckout
+     * @request POST:/api/order
+     */
+    orderCheckout: (data: CheckoutRequest, params: RequestParams = {}) =>
+      this.request<OrderDto, any>({
+        path: `/api/order`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Order
+     * @name OrderGetById
+     * @request GET:/api/order/{id}
+     */
+    orderGetById: (id: number, params: RequestParams = {}) =>
+      this.request<OrderDto, any>({
+        path: `/api/order/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+  };
 }
-
-export const api = new Api();

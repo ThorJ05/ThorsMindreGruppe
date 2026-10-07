@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from "react";
-import { api, type CategoryDto, type ListingDto } from "../Api";
-
+import { api } from "../api-instance";
+import type { CategoryDto, ListingDto } from "../Api";
 export default function AdminDashboard() {
     const [listings, setListings] = useState<ListingDto[]>([]);
     const [categories, setCategories] = useState<CategoryDto[]>([]);

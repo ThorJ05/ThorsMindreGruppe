@@ -1,5 +1,6 @@
 ﻿import { useEffect, useState } from "react";
-import { api, type CategoryDto } from "../Api";
+import { api } from "../api-instance";
+import type { CategoryDto } from "../Api";
 
 const empty: CategoryDto = {
     name: "",
