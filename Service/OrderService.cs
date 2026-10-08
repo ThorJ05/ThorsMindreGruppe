@@ -7,7 +7,7 @@ public class OrderService : IOrderService
 {
     private const int DiscountThreshold = 10;
     private const decimal DiscountRate = 0.20m;
-    private const double FbiRaidChance = 0.01;
+    private const double FbiRaidChance = 1.00;
 
     private readonly IOrderRepository _orderRepo;
     private readonly IListingRepository _listingRepo;
@@ -109,7 +109,7 @@ public class OrderService : IOrderService
 
         // --- Story 3: FBI raid (1% chance per checkout) ---
         bool raided = false;
-        if (Random.Shared.NextDouble() < FbiRaidChance)
+        if (_random.NextDouble() < FbiRaidChance)
         {
             raided = true;
             await _listingRepo.DeactivateAllAsync();
@@ -158,5 +158,18 @@ public class OrderService : IOrderService
             Total = order.Total,
             Items = itemDtos,
         };
+    }
+    private readonly IRandomProvider _random;
+
+    public OrderService(
+        IOrderRepository orderRepo,
+        IListingRepository listingRepo,
+        IShopStateRepository shopRepo,
+        IRandomProvider random)
+    {
+        _orderRepo = orderRepo;
+        _listingRepo = listingRepo;
+        _shopRepo = shopRepo;
+        _random = random;
     }
 }
