@@ -22,7 +22,7 @@ public class ShopStateService : IShopStateService
         return new ShopStatsDto
         {
             TotalOrders = completed,
-            IsFeatured = completed > 100,
+            IsFeatured = completed > 4,
             IsSeized = state.IsSeized,
             SeizedAt = state.SeizedAt,
             SeizedReason = state.SeizedReason,
