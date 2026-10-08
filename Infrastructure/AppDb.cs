@@ -12,4 +12,5 @@ public class AppDb : DataConnection
     public ITable<Listing> Listings => this.GetTable<Listing>();
     public ITable<Order> Orders => this.GetTable<Order>();
     public ITable<OrderItem> OrderItems => this.GetTable<OrderItem>();
+    public ITable<ShopState> ShopStates => this.GetTable<ShopState>();
 }

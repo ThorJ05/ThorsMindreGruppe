@@ -7,10 +7,12 @@ export default function CartPage() {
     const { lines, removeFromCart, setQuantity, clearCart, total } = useCart();
     const [error, setError] = useState<string | null>(null);
     const [checkingOut, setCheckingOut] = useState(false);
+    const [discountMsg, setDiscountMsg] = useState<string | null>(null);
     const navigate = useNavigate();
 
     async function checkout() {
         setError(null);
+        setDiscountMsg(null);
         setCheckingOut(true);
         try {
             const res = await api.api.orderCheckout({
@@ -19,11 +21,44 @@ export default function CartPage() {
                     quantity: l.quantity,
                 })),
             });
+
             clearCart();
-            navigate(`/orders`);
+
+            // Story 3: FBI raid fired on this checkout
+            if (res.data.raided) {
+                alert("A federal raid has occurred. The shop has been seized.");
+                window.location.href = "/";
+                return;
+            }
+
+            // Story 1: discount was applied
+            if (res.data.discountApplied) {
+                setDiscountMsg(
+                    `Loyalty discount applied: −${res.data.discountAmount} THRONES`
+                );
+            }
+
+            navigate("/orders");
         } catch (err: any) {
-            const message = err?.error ?? "Checkout failed.";
-            setError(typeof message === "string" ? message : "Checkout failed.");
+            // Log the whole error so we can inspect it if the message lookup fails.
+            console.error("Checkout error:", err);
+
+            // The generated client throws the response object on non-2xx.
+            // The backend now returns { error: "..." } — try every plausible
+            // place the message might live before falling back.
+            const message =
+                err?.error?.error ??
+                err?.error ??
+                err?.data?.error ??
+                err?.data ??
+                err?.message ??
+                "Checkout failed.";
+
+            setError(
+                typeof message === "string"
+                    ? message
+                    : JSON.stringify(message)
+            );
         } finally {
             setCheckingOut(false);
         }
@@ -112,6 +147,9 @@ export default function CartPage() {
                 </button>
             </div>
 
+            {discountMsg && (
+                <p style={{ color: "#c9a227", marginTop: "1rem" }}>{discountMsg}</p>
+            )}
             {error && (
                 <p style={{ color: "#e8544a", marginTop: "1rem" }}>{error}</p>
             )}

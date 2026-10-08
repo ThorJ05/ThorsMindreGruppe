@@ -9,37 +9,41 @@ namespace API;
 public class OrderController : ControllerBase
 {
     private readonly IOrderService _service;
+    private readonly IShopStateService _shop;
 
-    public OrderController(IOrderService service)
+    public OrderController(IOrderService service, IShopStateService shop)
     {
         _service = service;
+        _shop = shop;
     }
 
     [HttpGet]
     public async Task<ActionResult<List<OrderDto>>> GetAll()
-    {
-        return Ok(await _service.GetAllAsync());
-    }
+        => Ok(await _service.GetAllAsync());
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<OrderDto>> GetById(int id)
     {
         var order = await _service.GetByIdAsync(id);
-
-        if (order == null)
-            return NotFound();
-
-        return Ok(order);
+        return order == null ? NotFound() : Ok(order);
     }
 
     [HttpPost]
-    public async Task<ActionResult<OrderDto>> Checkout(CheckoutRequest request)
+    public async Task<ActionResult<CheckoutResultDto>> Checkout(CheckoutRequest request)
     {
-        var (success, error, order) = await _service.CheckoutAsync(request);
+        var (success, error, result, _) = await _service.CheckoutAsync(request);
+        if (!success) return BadRequest(new { error });   // ← wrap in object
+        return Ok(result);
+    }
 
-        if (!success)
-            return BadRequest(error);
+    [HttpGet("stats")]
+    public async Task<ActionResult<ShopStatsDto>> GetStats()
+        => Ok(await _shop.GetStateAsync());
 
-        return CreatedAtAction(nameof(GetById), new { id = order!.Id }, order);
+    [HttpPost("reset-seizure")]
+    public async Task<IActionResult> ResetSeizure()
+    {
+        await _shop.ResetAsync();
+        return NoContent();
     }
 }

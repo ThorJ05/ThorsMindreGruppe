@@ -6,4 +6,6 @@ public interface IOrderRepository
     Task<Order?> GetByIdAsync(int id);
     Task<List<OrderItem>> GetItemsByOrderIdAsync(int orderId);
     Task<int> CreateOrderAsync(Order order, List<OrderItem> items);
+    Task<int> CountAsync();
+    Task<int> CountCompletedAsync();
 }

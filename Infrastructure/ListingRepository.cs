@@ -27,4 +27,14 @@ public class ListingRepository : IListingRepository
         _db.Listings.Where(l => l.CategoryId == fromCategoryId)
             .Set(l => l.CategoryId, toCategoryId)
             .UpdateAsync();
+
+    public Task DeactivateAllAsync() =>
+        _db.Listings
+            .Set(l => l.IsActive, false)
+            .UpdateAsync();
+
+    public Task<int> DeleteSeizedAsync() =>
+        _db.Listings
+            .Where(l => l.IsActive == false)
+            .DeleteAsync();
 }

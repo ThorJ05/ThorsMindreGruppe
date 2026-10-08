@@ -57,6 +57,10 @@ export interface OrderDto {
   /** @format date-time */
   createdAt?: string;
   /** @format decimal */
+  subtotal?: number;
+  /** @format decimal */
+  discount?: number;
+  /** @format decimal */
   total?: number;
   items?: OrderItemDto[];
 }
@@ -73,6 +77,14 @@ export interface OrderItemDto {
   unitPrice?: number;
 }
 
+export interface CheckoutResultDto {
+  order?: OrderDto;
+  raided?: boolean;
+  discountApplied?: boolean;
+  /** @format decimal */
+  discountAmount?: number;
+}
+
 export interface CheckoutRequest {
   items?: CheckoutItemRequest[];
 }
@@ -82,6 +94,16 @@ export interface CheckoutItemRequest {
   listingId?: number;
   /** @format int32 */
   quantity?: number;
+}
+
+export interface ShopStatsDto {
+  /** @format int32 */
+  totalOrders?: number;
+  isFeatured?: boolean;
+  isSeized?: boolean;
+  /** @format date-time */
+  seizedAt?: string | null;
+  seizedReason?: string | null;
 }
 
 export type QueryParamsType = Record<string | number, any>;
@@ -137,7 +159,7 @@ export enum ContentType {
 }
 
 export class HttpClient<SecurityDataType = unknown> {
-    public baseUrl: string = "";
+  public baseUrl: string = "";
   private securityData: SecurityDataType | null = null;
   private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
   private abortControllers = new Map<CancelToken, AbortController>();
@@ -577,6 +599,21 @@ export class Api<
     /**
      * No description
      *
+     * @tags Listing
+     * @name ListingDeleteSeized
+     * @request DELETE:/api/listing/seized
+     */
+    listingDeleteSeized: (params: RequestParams = {}) =>
+      this.request<number, any>({
+        path: `/api/listing/seized`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @tags Order
      * @name OrderGetAll
      * @request GET:/api/order
@@ -597,7 +634,7 @@ export class Api<
      * @request POST:/api/order
      */
     orderCheckout: (data: CheckoutRequest, params: RequestParams = {}) =>
-      this.request<OrderDto, any>({
+      this.request<CheckoutResultDto, any>({
         path: `/api/order`,
         method: "POST",
         body: data,
@@ -618,6 +655,35 @@ export class Api<
         path: `/api/order/${id}`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Order
+     * @name OrderGetStats
+     * @request GET:/api/order/stats
+     */
+    orderGetStats: (params: RequestParams = {}) =>
+      this.request<ShopStatsDto, any>({
+        path: `/api/order/stats`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Order
+     * @name OrderResetSeizure
+     * @request POST:/api/order/reset-seizure
+     */
+    orderResetSeizure: (params: RequestParams = {}) =>
+      this.request<Blob, any>({
+        path: `/api/order/reset-seizure`,
+        method: "POST",
         ...params,
       }),
   };
