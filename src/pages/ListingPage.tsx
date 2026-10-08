@@ -1,45 +1,43 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api-instance";
-import type { CategoryDto, ListingDto } from "../Api";
+import type { CategoryDto, ListingDto, ShopStatsDto } from "../Api";
 import { useCart } from "../CartContext";
 
 export default function ListingPage() {
     const [listings, setListings] = useState<ListingDto[]>([]);
     const [categories, setCategories] = useState<CategoryDto[]>([]);
+    const [stats, setStats] = useState<ShopStatsDto | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // Filter/search/sort state.
     const [categoryId, setCategoryId] = useState<number | "">("");
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState<"newest" | "price-asc" | "price-desc">("newest");
     const { addToCart } = useCart();
 
     useEffect(() => {
-        Promise.all([api.api.listingGetAll(), api.api.categoryGetAll()])
-            .then(([lRes, cRes]) => {
-                console.log("listing response:", lRes);
-                console.log("category response:", cRes);
-
-                const listingsData = Array.isArray(lRes?.data) ? lRes.data : lRes;
-                const categoriesData = Array.isArray(cRes?.data) ? cRes.data : cRes;
-
-                setListings(Array.isArray(listingsData) ? listingsData : []);
-                setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+        Promise.all([
+            api.api.listingGetAll(),
+            api.api.categoryGetAll(),
+            api.api.orderGetStats(),
+        ])
+            .then(([lRes, cRes, sRes]) => {
+                const listingsData = Array.isArray(lRes?.data) ? lRes.data : [];
+                const categoriesData = Array.isArray(cRes?.data) ? cRes.data : [];
+                setListings(listingsData);
+                setCategories(categoriesData);
+                setStats(sRes.data);
             })
             .catch(err => console.error("Failed to load:", err))
             .finally(() => setLoading(false));
     }, []);
 
-    // Derive the visible list: filter by category, filter by search text,
-    // then sort. useMemo avoids recomputing on every unrelated re-render.
     const visibleListings = useMemo(() => {
         let result = listings;
 
         if (categoryId !== "") {
             result = result.filter(l => l.categoryId === categoryId);
         }
-
         if (search.trim()) {
             const q = search.trim().toLowerCase();
             result = result.filter(l => l.title?.toLowerCase().includes(q));
@@ -51,10 +49,8 @@ export default function ListingPage() {
         } else if (sortBy === "price-desc") {
             result.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
         } else {
-            // "newest" — higher id assumed more recent, since there's no createdAt field.
             result.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
         }
-
         return result;
     }, [listings, categoryId, search, sortBy]);
 
@@ -62,6 +58,25 @@ export default function ListingPage() {
 
     return (
         <div className="templar-main" style={{ padding: "2rem" }}>
+            {/* Story 2: featured banner */}
+            {stats?.isFeatured && (
+                <div
+                    style={{
+                        border: "2px solid #c9a227",
+                        background: "rgba(201,162,39,.08)",
+                        padding: "1rem 1.25rem",
+                        marginBottom: "1.5rem",
+                        textAlign: "center",
+                        fontFamily: '"Cinzel", serif',
+                        letterSpacing: ".2em",
+                        textTransform: "uppercase",
+                        color: "#c9a227",
+                    }}
+                >
+                    ★ Featured Warband — {stats.totalOrders} orders fulfilled ★
+                </div>
+            )}
+
             <h2>Listings</h2>
 
             <div
@@ -100,8 +115,18 @@ export default function ListingPage() {
             <div className="templar-products">
                 {visibleListings.map(listing => {
                     const category = categories.find(c => c.id === listing.categoryId);
+                    const isSeized = listing.isActive === false;
+
                     return (
-                        <div key={listing.id} className="templar-card">
+                        <div
+                            key={listing.id}
+                            className="templar-card"
+                            style={isSeized ? {
+                                position: "relative",
+                                borderColor: "#8b1a1a",
+                            } : undefined}
+                        >
+                            {/* Greyed image if seized */}
                             {listing.imageUrl ? (
                                 <img
                                     src={listing.imageUrl}
@@ -116,82 +141,122 @@ export default function ListingPage() {
                                         border: "1px solid #2a2f38",
                                         marginBottom: ".75rem",
                                         display: "block",
+                                        filter: isSeized ? "grayscale(1) brightness(.4)" : undefined,
                                     }}
                                 />
                             ) : (
                                 <div className="thumb">NO PICTORIAL RECORD</div>
                             )}
 
-                            <h3>{listing.title}</h3>
+                            {/* If seized, show a big red SEIZED overlay covering the info */}
+                            {isSeized ? (
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        padding: "1.5rem .75rem",
+                                        border: "2px solid #8b1a1a",
+                                        background: "rgba(139,26,26,.15)",
+                                        textAlign: "center",
+                                        minHeight: "150px",
+                                    }}
+                                >
+                                    <div style={{
+                                        fontFamily: '"Cinzel", serif',
+                                        fontWeight: 700,
+                                        fontSize: "1.4rem",
+                                        letterSpacing: ".25em",
+                                        color: "#c62b2b",
+                                        textShadow: "0 0 12px rgba(198,43,43,.5)",
+                                    }}>
+                                        SEIZED
+                                    </div>
+                                    <div style={{
+                                        color: "#8a7a52",
+                                        fontSize: ".7rem",
+                                        letterSpacing: ".12em",
+                                        textTransform: "uppercase",
+                                        marginTop: ".5rem",
+                                    }}>
+                                        by federal authorities
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <h3>{listing.title}</h3>
 
-                            {listing.description && (
-                                <p style={{
-                                    color: "#8a7a52",
-                                    fontSize: ".8rem",
-                                    margin: "0 0 .5rem",
-                                    lineHeight: 1.4,
-                                }}>
-                                    {listing.description}
-                                </p>
+                                    {listing.description && (
+                                        <p style={{
+                                            color: "#8a7a52",
+                                            fontSize: ".8rem",
+                                            margin: "0 0 .5rem",
+                                            lineHeight: 1.4,
+                                        }}>
+                                            {listing.description}
+                                        </p>
+                                    )}
+
+                                    <div className="vendor">
+                                        {category?.name ?? "Unclassified"}
+                                    </div>
+                                    <div className="price">{listing.price} THRONES</div>
+                                    <div className="vendor" style={{ marginTop: ".35rem" }}>
+                                        Stock: {listing.stock}
+                                    </div>
+
+                                    {listing.isOutOfStock && (
+                                        <p style={{
+                                            background: "#8b1a1a",
+                                            color: "#e8d9b0",
+                                            padding: ".25rem",
+                                            textAlign: "center",
+                                            fontWeight: "bold",
+                                            fontSize: ".7rem",
+                                            letterSpacing: ".12em",
+                                            marginTop: ".5rem",
+                                        }}>
+                                            DEPLETED
+                                        </p>
+                                    )}
+
+                                    <Link
+                                        to={`/editor/${listing.id}`}
+                                        style={{
+                                            display: "inline-block",
+                                            marginTop: ".75rem",
+                                            padding: ".35rem .75rem",
+                                            border: "1px solid #8b1a1a",
+                                            color: "#e8d9b0",
+                                            fontSize: ".7rem",
+                                            letterSpacing: ".14em",
+                                            textTransform: "uppercase",
+                                            textDecoration: "none",
+                                        }}
+                                    >
+                                        Amend Record
+                                    </Link>
+                                    <button
+                                        onClick={() => addToCart(listing)}
+                                        disabled={listing.isOutOfStock}
+                                        style={{
+                                            display: "block",
+                                            marginTop: ".5rem",
+                                            padding: ".35rem .75rem",
+                                            background: listing.isOutOfStock ? "#333" : "#8b1a1a",
+                                            color: "#e8d9b0",
+                                            border: "none",
+                                            fontSize: ".7rem",
+                                            letterSpacing: ".14em",
+                                            textTransform: "uppercase",
+                                            cursor: listing.isOutOfStock ? "not-allowed" : "pointer",
+                                        }}
+                                    >
+                                        Add to Cart
+                                    </button>
+                                </>
                             )}
-
-                            <div className="vendor">
-                                {category?.name ?? "Unclassified"}
-                            </div>
-                            <div className="price">{listing.price} THRONES</div>
-                            <div className="vendor" style={{ marginTop: ".35rem" }}>
-                                Stock: {listing.stock}
-                            </div>
-
-                            {listing.isOutOfStock && (
-                                <p style={{
-                                    background: "#8b1a1a",
-                                    color: "#e8d9b0",
-                                    padding: ".25rem",
-                                    textAlign: "center",
-                                    fontWeight: "bold",
-                                    fontSize: ".7rem",
-                                    letterSpacing: ".12em",
-                                    marginTop: ".5rem",
-                                }}>
-                                    DEPLETED
-                                </p>
-                            )}
-
-                            <Link
-                                to={`/editor/${listing.id}`}
-                                style={{
-                                    display: "inline-block",
-                                    marginTop: ".75rem",
-                                    padding: ".35rem .75rem",
-                                    border: "1px solid #8b1a1a",
-                                    color: "#e8d9b0",
-                                    fontSize: ".7rem",
-                                    letterSpacing: ".14em",
-                                    textTransform: "uppercase",
-                                    textDecoration: "none",
-                                }}
-                            >
-                                Amend Record
-                            </Link>
-                            <button
-                                onClick={() => addToCart(listing)}
-                                disabled={listing.isOutOfStock}
-                                style={{
-                                    display: "block",
-                                    marginTop: ".5rem",
-                                    padding: ".35rem .75rem",
-                                    background: listing.isOutOfStock ? "#333" : "#8b1a1a",
-                                    color: "#e8d9b0",
-                                    border: "none",
-                                    fontSize: ".7rem",
-                                    letterSpacing: ".14em",
-                                    textTransform: "uppercase",
-                                    cursor: listing.isOutOfStock ? "not-allowed" : "pointer",
-                                }}
-                            >
-                                Add to Cart
-                            </button>
                         </div>
                     );
                 })}

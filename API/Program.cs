@@ -14,6 +14,8 @@ builder.Services.AddScoped<IListingRepository, ListingRepository>();
 builder.Services.AddScoped<IListingService, ListingService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IShopStateRepository, ShopStateRepository>();
+builder.Services.AddScoped<IShopStateService, ShopStateService>();
 
 builder.Services.AddLinqToDBContext<AppDb>((provider, options) =>
     options.UseSQLite(

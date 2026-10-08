@@ -91,6 +91,9 @@ public class ListingService : IListingService
         }
     }
 
+    public Task<int> DeleteSeizedAsync() =>
+        _repo.DeleteSeizedAsync();
+
     private ListingDto ToDto(Listing l) =>
         new ListingDto
         {

@@ -6,5 +6,5 @@ public interface IOrderService
 {
     Task<List<OrderDto>> GetAllAsync();
     Task<OrderDto?> GetByIdAsync(int id);
-    Task<(bool Success, string? Error, OrderDto? Order)> CheckoutAsync(CheckoutRequest request);
+    Task<(bool Success, string? Error, CheckoutResultDto, OrderDto? Order)> CheckoutAsync(CheckoutRequest request);
 }

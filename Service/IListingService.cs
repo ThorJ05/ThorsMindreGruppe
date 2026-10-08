@@ -10,4 +10,5 @@ public interface IListingService
     Task<ListingDto?> UpdateAsync(int id, ListingDto dto);
     Task<bool> SetActiveAsync(int id, bool active);
     Task BulkUpdateAsync(List<int> ids, decimal? price, int? stock);
+    Task<int> DeleteSeizedAsync();
 }

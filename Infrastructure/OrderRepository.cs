@@ -1,6 +1,5 @@
 using LinqToDB;
 using LinqToDB.Async;
-using LinqToDB.Data;
 
 namespace Infrastructure;
 
@@ -33,4 +32,10 @@ public class OrderRepository : IOrderRepository
         await transaction.CommitAsync();
         return orderId;
     }
+
+    public Task<int> CountAsync() =>
+        _db.Orders.CountAsync();
+
+    public Task<int> CountCompletedAsync() =>
+        _db.Orders.Where(o => o.Status == "Completed").CountAsync();
 }
